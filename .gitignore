@@ -1,0 +1,96 @@
+# =========================
+# Node dependencies
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Build outputs
+# =========================
+dist/
+build/
+.out/
+.next/
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# OS generated files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Editor / IDE files
+# =========================
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Coverage / Testing
+# =========================
+coverage/
+.nyc_output/
+
+# =========================
+# Cache directories
+# =========================
+.cache/
+.parcel-cache/
+.eslintcache
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
+*.tmp
+
+# =========================
+# Cloud / Uploads
+# =========================
+uploads/
+cloudinary-cache/
+
+# =========================
+# Database
+# =========================
+*.sqlite
+*.sqlite3
+*.db
+
+# =========================
+# Certificates / keys
+# =========================
+*.pem
+*.key
+*.crt
+
+# =========================
+# Package managers
+# =========================
+.pnpm-store/
+
+# =========================
+# Misc
+# =========================
+.vercel
+.render
