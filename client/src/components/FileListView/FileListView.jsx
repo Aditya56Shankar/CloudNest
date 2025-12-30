@@ -1,16 +1,17 @@
-import React from "react";
 import {
-  FileText,
-  Image,
-  Music,
-  Video,
   Archive,
   Code,
-  File,
   Download,
-  Trash2,
+  File,
+  FileText,
+  Heart,
+  Image,
+  Music,
   Share2,
+  Trash2,
+  Video,
 } from "lucide-react";
+import React from "react";
 
 function getFileIcon(fileName) {
   const ext = fileName?.split(".").pop()?.toLowerCase() || "";
@@ -32,6 +33,7 @@ export default function FileListView({
   onShare,
   onRename,
   onOpen,
+  onToggleStar,
   sortBy = "name",
   sortOrder = "asc",
   onSort,
@@ -91,6 +93,7 @@ export default function FileListView({
                   onShare={() => onShare(file)}
                   onRename={() => onRename(file)}
                   onOpen={() => onOpen(file)}
+                  onToggleStar={() => onToggleStar(file)}
                 />
               ))}
             </tbody>
@@ -108,6 +111,7 @@ function FileListItem({
   onDelete,
   onShare,
   onOpen,
+  onToggleStar,
 }) {
   const [showActions, setShowActions] = React.useState(false);
 
@@ -134,6 +138,11 @@ function FileListItem({
       <td className="px-6 py-3 text-right">
         {showActions && (
           <div className="flex justify-end gap-2">
+            <ActionIconButton
+              icon={<Heart size={16} className={file.isStarred ? "fill-yellow-400 text-yellow-400" : ""} />}
+              onClick={onToggleStar}
+              title={file.isStarred ? "Unstar" : "Star"}
+            />
             <ActionIconButton
               icon={<Download size={16} />}
               onClick={onDownload}

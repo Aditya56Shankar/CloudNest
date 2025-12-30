@@ -16,6 +16,18 @@ const bookSchema = new mongoose.Schema(
     fileName: { type: String },
     isPublic: { type: Boolean, default: false },
 
+    // ⭐ Starred field
+    isStarred: {
+      type: Boolean,
+      default: false
+    },
+
+    // 📅 Last accessed field for recent files
+    lastAccessedAt: {
+      type: Date,
+      default: Date.now
+    },
+
     // ♻️ Recycle Bin fields
     isDeleted: {
       type: Boolean,

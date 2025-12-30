@@ -1,10 +1,12 @@
-import express from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 import { apiReference } from "@scalar/express-api-reference";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import dotenv from "dotenv";
+import express from "express";
 
 import connectDB from "./config/db.js";
+import authRoutes from "./routes/auth.js";
+import bookRoutes from "./routes/books.js";
 
 dotenv.config();
 
@@ -14,8 +16,6 @@ if (!process.env.JWT_SECRET) {
   );
   process.env.JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 }
-import authRoutes from "./routes/auth.js";
-import bookRoutes from "./routes/books.js";
 
 const app = express();
 const PORT = 3000;
@@ -35,7 +35,7 @@ app.use(
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })

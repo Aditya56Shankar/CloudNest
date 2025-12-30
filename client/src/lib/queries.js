@@ -24,7 +24,7 @@ const handleResponse = async (response) => {
     try {
       const error = await response.json();
       message = error.error || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -47,6 +47,22 @@ export const getPublicBooks = async () => {
 // Logged-in user's books (NOT deleted)
 export const getMyBooks = async () => {
   const res = await fetch(`${API_URL}/books/my-books`, {
+    headers: getHeaders(),
+  });
+  return handleResponse(res);
+};
+
+// Starred books
+export const getStarredBooks = async () => {
+  const res = await fetch(`${API_URL}/books/starred`, {
+    headers: getHeaders(),
+  });
+  return handleResponse(res);
+};
+
+// Recent books
+export const getRecentBooks = async () => {
+  const res = await fetch(`${API_URL}/books/recent`, {
     headers: getHeaders(),
   });
   return handleResponse(res);
@@ -125,6 +141,18 @@ export const restoreBook = async (id) => {
 export const deleteBookPermanently = async (id) => {
   const res = await fetch(`${API_URL}/books/${id}/permanent`, {
     method: "DELETE",
+    headers: getHeaders(),
+  });
+  return handleResponse(res);
+};
+
+/**
+ * ⭐ TOGGLE STAR
+ * Backend: PATCH /books/:id/star
+ */
+export const toggleStar = async (id) => {
+  const res = await fetch(`${API_URL}/books/${id}/star`, {
+    method: "PATCH",
     headers: getHeaders(),
   });
   return handleResponse(res);

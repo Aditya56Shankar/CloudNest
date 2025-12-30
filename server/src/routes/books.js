@@ -40,6 +40,37 @@ router.get("/my-books", authenticate, async (req, res) => {
   }
 });
 
+// STARRED BOOKS
+router.get("/starred", authenticate, async (req, res) => {
+  try {
+    const books = await Book.find({
+      userId: req.user._id,
+      isDeleted: false,
+      isStarred: true
+    }).sort({ updatedAt: -1 });
+
+    res.json(books);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch starred books" });
+  }
+});
+
+// RECENT BOOKS (sorted by last accessed)
+router.get("/recent", authenticate, async (req, res) => {
+  try {
+    const books = await Book.find({
+      userId: req.user._id,
+      isDeleted: false
+    })
+      .sort({ lastAccessedAt: -1 })
+      .limit(20); // Show last 20 accessed files
+
+    res.json(books);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch recent books" });
+  }
+});
+
 router.get("/recycle-bin", authenticate, async (req, res) => {
   const books = await Book.find({
     userId: req.user._id,
@@ -47,6 +78,49 @@ router.get("/recycle-bin", authenticate, async (req, res) => {
   }).sort({ deletedAt: -1 });
 
   res.json(books);
+});
+
+// TOGGLE STAR (must be before /:id route)
+router.patch("/:id/star", authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("Toggle star request for ID:", id);
+    console.log("User:", req.user?._id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.log("Invalid book ID");
+      return res.status(400).json({ error: "Invalid book ID" });
+    }
+
+    const book = await Book.findById(id);
+    console.log("Book found:", book ? "yes" : "no");
+
+    if (!book) {
+      return res.status(404).json({ error: "Book not found" });
+    }
+
+    console.log("Book userId:", book.userId);
+    console.log("Current isStarred:", book.isStarred);
+
+    if (String(book.userId) !== String(req.user._id)) {
+      console.log("Not authorized");
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    // Toggle starred status
+    book.isStarred = !book.isStarred;
+    await book.save();
+
+    console.log("New isStarred:", book.isStarred);
+
+    res.json({
+      message: book.isStarred ? "File starred" : "File unstarred",
+      book
+    });
+  } catch (err) {
+    console.error("Toggle star error:", err);
+    res.status(500).json({ error: "Failed to update star status" });
+  }
 });
 
 
@@ -71,6 +145,10 @@ router.get("/:id", authenticate, async (req, res) => {
     if (!book.isPublic && String(book.userId._id) !== String(req.user._id)) {
       return res.status(403).json({ error: "Access denied" });
     }
+
+    // Update last accessed time
+    book.lastAccessedAt = new Date();
+    await book.save();
 
     res.json(book);
   } catch (err) {

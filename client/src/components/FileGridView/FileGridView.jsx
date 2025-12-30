@@ -1,18 +1,18 @@
-import { useState } from "react";
 import {
-  FileText,
-  Image,
-  Music,
-  Video,
   Archive,
   Code,
-  File,
   Download,
-  Trash2,
-  Share2,
+  File,
+  FileText,
   Heart,
-  RotateCcw
+  Image,
+  Music,
+  RotateCcw,
+  Share2,
+  Trash2,
+  Video
 } from "lucide-react";
+import { useState } from "react";
 
 /* ================= FILE ICON ================= */
 
@@ -46,7 +46,8 @@ export default function FileGridView({
   onPermanentDelete,
   onShare,
   onRename,
-  onOpen
+  onOpen,
+  onToggleStar
 }) {
   const [selectedFiles, setSelectedFiles] = useState(new Set());
   const [contextMenu, setContextMenu] = useState(null);
@@ -91,6 +92,7 @@ export default function FileGridView({
               onPermanentDelete={() => onPermanentDelete?.(file._id)}
               onShare={() => onShare?.(file)}
               onOpen={() => onOpen?.(file)}
+              onToggleStar={() => onToggleStar?.(file)}
             />
           ))}
         </div>
@@ -105,6 +107,7 @@ export default function FileGridView({
           onRestore={onRestore}
           onPermanentDelete={onPermanentDelete}
           onShare={onShare}
+          onToggleStar={onToggleStar}
           onClose={() => setContextMenu(null)}
         />
       )}
@@ -128,18 +131,18 @@ function FileGridItem({
   onRestore,
   onPermanentDelete,
   onShare,
-  onOpen
+  onOpen,
+  onToggleStar
 }) {
   return (
     <div
       onContextMenu={onContextMenu}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className={`relative p-3 rounded-lg border-2 cursor-pointer transition ${
-        isSelected
+      className={`relative p-3 rounded-lg border-2 cursor-pointer transition ${isSelected
           ? "border-blue-500 bg-blue-50"
           : "border-transparent hover:border-gray-200 bg-gray-50"
-      }`}
+        }`}
       onClick={onToggleSelect}
     >
       {/* Checkbox */}
@@ -222,9 +225,17 @@ function FileGridItem({
       )}
 
       {/* Star */}
-      {!isTrash && isHovered && (
+      {!isTrash && (
         <div className="absolute top-2 right-2">
-          <ActionButton icon={<Heart size={16} />} />
+          <ActionButton
+            icon={<Heart size={16} className={file.isStarred ? "fill-yellow-400 text-yellow-400" : ""} />}
+            title={file.isStarred ? "Unstar" : "Star"}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleStar();
+            }}
+            className={file.isStarred ? "bg-yellow-50" : ""}
+          />
         </div>
       )}
     </div>
@@ -257,6 +268,7 @@ function ContextMenu({
   onRestore,
   onPermanentDelete,
   onShare,
+  onToggleStar,
   onClose
 }) {
   return (
@@ -293,6 +305,14 @@ function ContextMenu({
               label="Download"
               onClick={() => {
                 onDownload(file);
+                onClose();
+              }}
+            />
+            <MenuItem
+              icon={<Heart size={16} className={file.isStarred ? "fill-yellow-400 text-yellow-400" : ""} />}
+              label={file.isStarred ? "Unstar" : "Star"}
+              onClick={() => {
+                onToggleStar(file);
                 onClose();
               }}
             />

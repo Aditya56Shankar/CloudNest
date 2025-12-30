@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -9,11 +9,14 @@ import UploadArea from "../components/UploadArea/UploadArea";
 import Loader from "../components/ui/Loader";
 
 import {
+  deleteBookPermanently,
   getMyBooks,
+  getRecentBooks,
+  getStarredBooks,
   getTrashBooks,
   moveBookToTrash,
-  restoreTrash,            // ✅ UPDATED
-  deleteBookPermanently,
+  restoreTrash,
+  toggleStar,
   updateBook
 } from "../lib/queries";
 
@@ -33,6 +36,8 @@ export default function DriveDashboard() {
   const [sortOrder, setSortOrder] = useState("asc");
 
   const isTrash = currentFolder === "trash";
+  const isStarred = currentFolder === "starred";
+  const isRecent = currentFolder === "recent";
 
   /* ================= AUTH GUARD ================= */
 
@@ -45,14 +50,25 @@ export default function DriveDashboard() {
   const fetchFiles = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = isTrash ? await getTrashBooks() : await getMyBooks();
+      let data;
+
+      if (isTrash) {
+        data = await getTrashBooks();
+      } else if (isStarred) {
+        data = await getStarredBooks();
+      } else if (isRecent) {
+        data = await getRecentBooks();
+      } else {
+        data = await getMyBooks();
+      }
+
       setFiles(data);
     } catch {
       toast.error("Failed to load files");
     } finally {
       setIsLoading(false);
     }
-  }, [isTrash]);
+  }, [isTrash, isStarred, isRecent]);
 
   useEffect(() => {
     fetchFiles();
@@ -123,6 +139,93 @@ export default function DriveDashboard() {
     if (file.fileUrl) window.open(file.fileUrl, "_blank");
   };
 
+  const handleDownload = async (file) => {
+    if (!file.fileUrl) {
+      toast.error("File URL not available");
+      return;
+    }
+
+    try {
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement("a");
+      link.href = file.fileUrl;
+      link.download = file.fileName || file.title || "download";
+      link.target = "_blank";
+
+      // Trigger the download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("Download started");
+    } catch (error) {
+      toast.error("Download failed");
+    }
+  };
+
+  const handleShare = async (file) => {
+    if (!file.fileUrl) {
+      toast.error("File URL not available");
+      return;
+    }
+
+    try {
+      // Check if the Web Share API is available
+      if (navigator.share) {
+        await navigator.share({
+          title: file.title,
+          text: `Check out this file: ${file.title}`,
+          url: file.fileUrl,
+        });
+        toast.success("Shared successfully");
+      } else {
+        // Fallback: Copy link to clipboard
+        await navigator.clipboard.writeText(file.fileUrl);
+        toast.success("Link copied to clipboard");
+      }
+    } catch (error) {
+      // If user cancels share or clipboard fails, copy manually
+      if (error.name === "AbortError") {
+        // User cancelled the share, do nothing
+        return;
+      }
+
+      // Final fallback: show the URL in a prompt
+      const dummy = document.createElement("input");
+      document.body.appendChild(dummy);
+      dummy.value = file.fileUrl;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+      toast.success("Link copied to clipboard");
+    }
+  };
+
+  const handleToggleStar = async (file) => {
+    try {
+      console.log("Toggling star for file:", file._id);
+      const result = await toggleStar(file._id);
+      console.log("Toggle star result:", result);
+
+      // Update local state
+      setFiles((prev) =>
+        prev.map((f) =>
+          f._id === file._id ? { ...f, isStarred: !f.isStarred } : f
+        )
+      );
+
+      // If we're in starred view and file is unstarred, remove it
+      if (isStarred && file.isStarred) {
+        setFiles((prev) => prev.filter((f) => f._id !== file._id));
+      }
+
+      toast.success(result.message || (file.isStarred ? "Unstarred" : "Starred"));
+    } catch (error) {
+      console.error("Toggle star error:", error);
+      toast.error(error.message || "Failed to update star status");
+    }
+  };
+
   /* ================= FILTER ================= */
 
   const filteredFiles = useMemo(() => {
@@ -159,7 +262,7 @@ export default function DriveDashboard() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold">
-                {isTrash ? "Trash" : "My Files"}
+                {isTrash ? "Trash" : isStarred ? "Starred" : isRecent ? "Recent" : "My Files"}
               </h2>
               <p className="text-sm text-gray-500">
                 {filteredFiles.length} items
@@ -186,7 +289,7 @@ export default function DriveDashboard() {
         {/* Empty State */}
         {filteredFiles.length === 0 ? (
           <div className="flex flex-1 items-center justify-center text-gray-500">
-            {isTrash ? "Trash is empty" : "No files found"}
+            {isTrash ? "Trash is empty" : isStarred ? "No starred files" : isRecent ? "No recent files" : "No files found"}
           </div>
         ) : (
           <div className="flex-1 overflow-auto bg-gray-50">
@@ -195,18 +298,26 @@ export default function DriveDashboard() {
                 files={filteredFiles}
                 isTrash={isTrash}
                 onDelete={handleDelete}
-                onRestore={handleRestore}          // ✅ CORRECT
+                onRestore={handleRestore}
                 onPermanentDelete={handlePermanentDelete}
                 onOpen={handleOpen}
+                onDownload={handleDownload}
+                onShare={handleShare}
+                onRename={handleRename}
+                onToggleStar={handleToggleStar}
               />
             ) : (
               <FileListView
                 files={filteredFiles}
                 isTrash={isTrash}
                 onDelete={handleDelete}
-                onRestore={handleRestore}          // ✅ CORRECT
+                onRestore={handleRestore}
                 onPermanentDelete={handlePermanentDelete}
                 onOpen={handleOpen}
+                onDownload={handleDownload}
+                onShare={handleShare}
+                onRename={handleRename}
+                onToggleStar={handleToggleStar}
                 sortBy={sortBy}
                 sortOrder={sortOrder}
                 onSort={(by) => {
