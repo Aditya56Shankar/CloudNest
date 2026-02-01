@@ -43,23 +43,23 @@ It allows users to upload, organize, manage, and summarize files securely, simil
 ## 📁 Project Structure
 
 CloudNest/
-├─ client/                     # React frontend
-│  ├─ src/
-│  └─ package.json
-│
-├─ server/                     # Node.js backend
-│  ├─ src/
-│  │  ├─ controllers/          # Request handlers
-│  │  ├─ routes/               # API routes
-│  │  ├─ models/               # MongoDB schemas
-│  │  ├─ utils/                # Helper utilities
-│  │  └─ index.js              # Server entry point
-│  │
-│  ├─ .env                     # Environment variables (NOT committed)
-│  └─ package.json
-│
-├─ README.md
-└─ .gitignore
+- client/                     # React frontend
+    - src/
+    - package.json
+
+- server/                     # Node.js backend
+    - src/
+        - controllers/          # Request handlers
+        - routes/               # API routes
+        - models/               # MongoDB schemas
+        - utils/                # Helper utilities
+        - index.js              # Server entry point
+
+        -.env                     # Environment variables (NOT committed)
+        - package.json
+
+- README.md
+- .gitignore
 
 Create a `.env` file in the **server root directory**.
 
