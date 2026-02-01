@@ -14,6 +14,7 @@ const bookSchema = new mongoose.Schema(
 
     fileUrl: { type: String },
     fileName: { type: String },
+    fileSize: { type: Number, default: 0 }, // Size in bytes
     isPublic: { type: Boolean, default: false },
 
     // ⭐ Starred field

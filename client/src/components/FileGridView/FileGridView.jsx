@@ -47,7 +47,8 @@ export default function FileGridView({
   onShare,
   onRename,
   onOpen,
-  onToggleStar
+  onToggleStar,
+  onSummarize
 }) {
   const [selectedFiles, setSelectedFiles] = useState(new Set());
   const [contextMenu, setContextMenu] = useState(null);
@@ -66,37 +67,29 @@ export default function FileGridView({
 
   return (
     <div className="p-6">
-      {files.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-          <FileText size={64} className="mb-4 opacity-30" />
-          <p className="text-lg font-medium">
-            {isTrash ? "Trash is empty" : "No files here"}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {files.map((file) => (
-            <FileGridItem
-              key={file._id}
-              file={file}
-              isTrash={isTrash}
-              isSelected={selectedFiles.has(file._id)}
-              isHovered={hoveredFile === file._id}
-              onToggleSelect={() => toggleSelect(file._id)}
-              onContextMenu={(e) => handleContextMenu(e, file)}
-              onMouseEnter={() => setHoveredFile(file._id)}
-              onMouseLeave={() => setHoveredFile(null)}
-              onDownload={() => onDownload?.(file)}
-              onDelete={() => onDelete?.(file._id)}
-              onRestore={() => onRestore?.(file._id)}
-              onPermanentDelete={() => onPermanentDelete?.(file._id)}
-              onShare={() => onShare?.(file)}
-              onOpen={() => onOpen?.(file)}
-              onToggleStar={() => onToggleStar?.(file)}
-            />
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        {files.map((file) => (
+          <FileGridItem
+            key={file._id}
+            file={file}
+            isTrash={isTrash}
+            isSelected={selectedFiles.has(file._id)}
+            isHovered={hoveredFile === file._id}
+            onToggleSelect={() => toggleSelect(file._id)}
+            onContextMenu={(e) => handleContextMenu(e, file)}
+            onMouseEnter={() => setHoveredFile(file._id)}
+            onMouseLeave={() => setHoveredFile(null)}
+            onDownload={() => onDownload?.(file)}
+            onDelete={() => onDelete?.(file._id)}
+            onRestore={() => onRestore?.(file._id)}
+            onPermanentDelete={() => onPermanentDelete?.(file._id)}
+            onShare={() => onShare?.(file)}
+            onOpen={() => onOpen?.(file)}
+            onToggleStar={() => onToggleStar?.(file)}
+            onSummarize={() => onSummarize?.(file)}
+          />
+        ))}
+      </div>
 
       {contextMenu && (
         <ContextMenu
@@ -108,6 +101,7 @@ export default function FileGridView({
           onPermanentDelete={onPermanentDelete}
           onShare={onShare}
           onToggleStar={onToggleStar}
+          onSummarize={onSummarize}
           onClose={() => setContextMenu(null)}
         />
       )}
@@ -132,127 +126,63 @@ function FileGridItem({
   onPermanentDelete,
   onShare,
   onOpen,
-  onToggleStar
+  onToggleStar,
+  onSummarize
 }) {
+  const isPDF = file.fileName?.toLowerCase().endsWith(".pdf");
+
   return (
     <div
       onContextMenu={onContextMenu}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className={`relative p-3 rounded-lg border-2 cursor-pointer transition ${isSelected
+      className={`relative p-3 rounded-lg border-2 cursor-pointer transition ${
+        isSelected
           ? "border-blue-500 bg-blue-50"
           : "border-transparent hover:border-gray-200 bg-gray-50"
-        }`}
+      }`}
       onClick={onToggleSelect}
     >
-      {/* Checkbox */}
-      <div className="absolute top-2 left-2">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={onToggleSelect}
-          onClick={(e) => e.stopPropagation()}
-        />
-      </div>
-
-      {/* File Icon */}
-      <div
-        className="flex justify-center mb-2"
-        onClick={(e) => {
-          e.stopPropagation();
-          !isTrash && onOpen();
-        }}
-      >
+      <div className="flex justify-center mb-2" onClick={(e) => {
+        e.stopPropagation();
+        !isTrash && onOpen();
+      }}>
         {getFileIcon(file.fileName)}
       </div>
 
-      {/* Name */}
       <p className="text-xs font-medium truncate text-center">{file.title}</p>
-      <p className="text-xs text-gray-500 text-center truncate">
-        {file.author}
-      </p>
 
-      {/* ACTIONS */}
       {isHovered && (
         <div className="absolute bottom-2 right-2 flex gap-1">
-          {isTrash ? (
-            <>
-              <ActionButton
-                icon={<RotateCcw size={16} />}
-                title="Restore"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRestore();
-                }}
-              />
-              <ActionButton
-                icon={<Trash2 size={16} />}
-                title="Delete forever"
-                className="text-red-600 hover:bg-red-100"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPermanentDelete();
-                }}
-              />
-            </>
-          ) : (
-            <>
-              <ActionButton
-                icon={<Download size={16} />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDownload();
-                }}
-              />
-              <ActionButton
-                icon={<Share2 size={16} />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onShare();
-                }}
-              />
-              <ActionButton
-                icon={<Trash2 size={16} />}
-                className="text-red-600 hover:bg-red-100"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-              />
-            </>
+          {isPDF && (
+            <ActionButton
+              icon={<FileText size={16} />}
+              title="Summarize PDF"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSummarize();
+              }}
+            />
           )}
+          <ActionButton icon={<Download size={16} />} onClick={onDownload} />
+          <ActionButton icon={<Share2 size={16} />} onClick={onShare} />
+          <ActionButton
+            icon={<Trash2 size={16} />}
+            className="text-red-600"
+            onClick={onDelete}
+          />
         </div>
       )}
 
-      {/* Star */}
       {!isTrash && (
         <div className="absolute top-2 right-2">
           <ActionButton
             icon={<Heart size={16} className={file.isStarred ? "fill-yellow-400 text-yellow-400" : ""} />}
-            title={file.isStarred ? "Unstar" : "Star"}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleStar();
-            }}
-            className={file.isStarred ? "bg-yellow-50" : ""}
+            onClick={onToggleStar}
           />
         </div>
       )}
     </div>
-  );
-}
-
-/* ================= ACTION BUTTON ================= */
-
-function ActionButton({ icon, onClick, title, className = "" }) {
-  return (
-    <button
-      onClick={onClick}
-      title={title}
-      className={`p-1.5 rounded bg-white hover:bg-gray-100 shadow ${className}`}
-    >
-      {icon}
-    </button>
   );
 }
 
@@ -269,8 +199,11 @@ function ContextMenu({
   onPermanentDelete,
   onShare,
   onToggleStar,
+  onSummarize,
   onClose
 }) {
+  const isPDF = file.fileName?.toLowerCase().endsWith(".pdf");
+
   return (
     <>
       <div className="fixed inset-0 z-10" onClick={onClose} />
@@ -278,65 +211,55 @@ function ContextMenu({
         className="fixed z-20 bg-white rounded-lg shadow border py-2 min-w-[200px]"
         style={{ left: x, top: y }}
       >
-        {isTrash ? (
-          <>
-            <MenuItem
-              icon={<RotateCcw size={16} />}
-              label="Restore"
-              onClick={() => {
-                onRestore(file._id);
-                onClose();
-              }}
-            />
-            <MenuItem
-              icon={<Trash2 size={16} />}
-              label="Delete forever"
-              className="text-red-600"
-              onClick={() => {
-                onPermanentDelete(file._id);
-                onClose();
-              }}
-            />
-          </>
-        ) : (
-          <>
-            <MenuItem
-              icon={<Download size={16} />}
-              label="Download"
-              onClick={() => {
-                onDownload(file);
-                onClose();
-              }}
-            />
-            <MenuItem
-              icon={<Heart size={16} className={file.isStarred ? "fill-yellow-400 text-yellow-400" : ""} />}
-              label={file.isStarred ? "Unstar" : "Star"}
-              onClick={() => {
-                onToggleStar(file);
-                onClose();
-              }}
-            />
-            <MenuItem
-              icon={<Share2 size={16} />}
-              label="Share"
-              onClick={() => {
-                onShare(file);
-                onClose();
-              }}
-            />
-            <MenuItem
-              icon={<Trash2 size={16} />}
-              label="Move to Trash"
-              className="text-red-600"
-              onClick={() => {
-                onDelete(file._id);
-                onClose();
-              }}
-            />
-          </>
+        {!isTrash && isPDF && (
+          <MenuItem
+            icon={<FileText size={16} />}
+            label="Summarize PDF"
+            onClick={() => {
+              onSummarize(file);
+              onClose();
+            }}
+          />
         )}
+        <MenuItem
+          icon={<Download size={16} />}
+          label="Download"
+          onClick={() => {
+            onDownload(file);
+            onClose();
+          }}
+        />
+        <MenuItem
+          icon={<Share2 size={16} />}
+          label="Share"
+          onClick={() => {
+            onShare(file);
+            onClose();
+          }}
+        />
+        <MenuItem
+          icon={<Trash2 size={16} />}
+          label="Move to Trash"
+          className="text-red-600"
+          onClick={() => {
+            onDelete(file._id);
+            onClose();
+          }}
+        />
       </div>
     </>
+  );
+}
+
+function ActionButton({ icon, onClick, title, className = "" }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className={`p-1.5 rounded bg-white hover:bg-gray-100 shadow ${className}`}
+    >
+      {icon}
+    </button>
   );
 }
 

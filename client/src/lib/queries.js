@@ -76,6 +76,14 @@ export const getTrashBooks = async () => {
   return handleResponse(res);
 };
 
+// Storage statistics
+export const getStorageStats = async () => {
+  const res = await fetch(`${API_URL}/books/storage-stats`, {
+    headers: getHeaders(),
+  });
+  return handleResponse(res);
+};
+
 /* =========================================================
    CREATE / UPDATE
 ========================================================= */

@@ -1,10 +1,12 @@
-import {Home, Clock, Star, Trash2, LogOut } from "lucide-react";
+import { Clock, Home, LogOut, Star, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../auth-context";
 
-export default function DriveSidebar({ currentFolder, onFolderClick }) {
+export default function DriveSidebar({ currentFolder, onFolderClick, storageUsed = 0, storageTotal = 15360 }) {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const storagePercentage = storageTotal > 0 ? (storageUsed / storageTotal) * 100 : 0;
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -57,10 +59,15 @@ export default function DriveSidebar({ currentFolder, onFolderClick }) {
         <div className="mb-3">
           <div className="flex justify-between text-sm mb-1">
             <span className="text-gray-700 font-medium">Storage</span>
-            <span className="text-gray-500 text-xs">2.5GB of 15GB</span>
+            <span className="text-gray-500 text-xs">
+              {storageUsed.toFixed(2)}MB of {storageTotal}MB
+            </span>
           </div>
           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full w-1/6 bg-blue-500 rounded-full" />
+            <div
+              className="h-full bg-blue-500 rounded-full transition-all"
+              style={{ width: `${Math.min(storagePercentage, 100)}%` }}
+            />
           </div>
         </div>
         <button className="text-blue-600 text-sm hover:underline font-medium w-full text-left">
@@ -94,11 +101,10 @@ function NavItem({ icon, label, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left font-medium transition ${
-        active
-          ? "bg-blue-50 text-blue-600"
-          : "text-gray-700 hover:bg-gray-100 text-gray-600"
-      }`}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left font-medium transition ${active
+        ? "bg-blue-50 text-blue-600"
+        : "text-gray-700 hover:bg-gray-100 text-gray-600"
+        }`}
     >
       {icon}
       <span>{label}</span>

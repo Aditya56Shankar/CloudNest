@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "fs";
 import mongoose from "mongoose";
 import { authenticate } from "../middleware/auth.js";
 import { upload } from "../middleware/multer.js";
@@ -78,6 +79,29 @@ router.get("/recycle-bin", authenticate, async (req, res) => {
   }).sort({ deletedAt: -1 });
 
   res.json(books);
+});
+
+// GET STORAGE STATS
+router.get("/storage-stats", authenticate, async (req, res) => {
+  try {
+    const books = await Book.find({
+      userId: req.user._id,
+      isDeleted: false
+    });
+
+    const totalSize = books.reduce((sum, book) => sum + (book.fileSize || 0), 0);
+    const totalSizeMB = totalSize / (1024 * 1024); // Convert bytes to MB
+    const storageLimit = 15360; // 15GB = 15360MB limit
+
+    res.json({
+      usedStorage: totalSizeMB,
+      totalStorage: storageLimit,
+      usedBytes: totalSize,
+      fileCount: books.length
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch storage stats" });
+  }
 });
 
 // TOGGLE STAR (must be before /:id route)
@@ -171,8 +195,13 @@ router.post(
 
     let fileUrl = null;
     let fileName = null;
+    let fileSize = 0;
 
     if (req.file) {
+      // Get file size before uploading
+      const stats = fs.statSync(req.file.path);
+      fileSize = stats.size; // Size in bytes
+
       const result = await uploadOnCloudinary(req.file.path);
       fileUrl = result.secure_url;
       fileName = req.file.originalname;
@@ -186,6 +215,7 @@ router.post(
       userId: req.user._id, // ✅ FIXED
       fileUrl,
       fileName,
+      fileSize,
     });
 
     res.status(201).json(book);
@@ -216,8 +246,13 @@ router.put(
 
     let fileUrl = book.fileUrl;
     let fileName = book.fileName;
+    let fileSize = book.fileSize;
 
     if (req.file) {
+      // Get file size before uploading
+      const stats = fs.statSync(req.file.path);
+      fileSize = stats.size; // Size in bytes
+
       const result = await uploadOnCloudinary(req.file.path);
       fileUrl = result.secure_url;
       fileName = req.file.originalname;
@@ -225,7 +260,7 @@ router.put(
 
     const updated = await Book.findByIdAndUpdate(
       id,
-      { ...req.body, fileUrl, fileName },
+      { ...req.body, fileUrl, fileName, fileSize },
       { new: true }
     );
 

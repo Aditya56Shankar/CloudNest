@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 
+import pdfRoutes from "./routes/pdf.js";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import bookRoutes from "./routes/books.js";
@@ -32,6 +33,7 @@ app.use(
 );
 
 
+
 app.use(
   cors({
     origin: "*",
@@ -48,6 +50,8 @@ app.use(cookieParser());
 
 app.use("/api/books", bookRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/books", pdfRoutes); 
+
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

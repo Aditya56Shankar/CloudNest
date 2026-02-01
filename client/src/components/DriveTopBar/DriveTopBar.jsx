@@ -1,13 +1,13 @@
+import { Grid, HelpCircle, List, Search, Settings } from "lucide-react";
 import { useState } from "react";
-import { Search, Settings, HelpCircle, Grid, List } from "lucide-react";
 
 export default function DriveTopBar({
   searchQuery,
   onSearchChange,
   viewMode,
   onViewModeChange,
-  storageUsed = 2.5,
-  storageTotal = 15,
+  storageUsed = 0,
+  storageTotal = 15360,
 }) {
   const [showProfile, setShowProfile] = useState(false);
   const storagePercentage = (storageUsed / storageTotal) * 100;
@@ -58,7 +58,7 @@ export default function DriveTopBar({
               />
             </div>
             <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap">
-              {storageUsed.toFixed(1)}GB of {storageTotal}GB
+              {storageUsed.toFixed(1)}MB of {storageTotal}MB
             </div>
           </div>
 
