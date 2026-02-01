@@ -43,19 +43,20 @@ It allows users to upload, organize, manage, and summarize files securely, simil
 ## 📁 Project Structure
 
 CloudNest/
-├─ client/ # React frontend
-│ ├─ src/
-│ └─ package.json
+├─ client/                     # React frontend
+│  ├─ src/
+│  └─ package.json
 │
-├─ server/ # Node.js backend
-│ ├─ src/
-│ │ ├─ controllers/
-│ │ ├─ routes/
-│ │ ├─ models/
-│ │ ├─ utils/
-│ │ └─ index.js
-│ ├─ .env # Environment variables (NOT committed)
-│ └─ package.json
+├─ server/                     # Node.js backend
+│  ├─ src/
+│  │  ├─ controllers/          # Request handlers
+│  │  ├─ routes/               # API routes
+│  │  ├─ models/               # MongoDB schemas
+│  │  ├─ utils/                # Helper utilities
+│  │  └─ index.js              # Server entry point
+│  │
+│  ├─ .env                     # Environment variables (NOT committed)
+│  └─ package.json
 │
 ├─ README.md
 └─ .gitignore
