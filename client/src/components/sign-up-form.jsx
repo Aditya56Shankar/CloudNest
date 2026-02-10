@@ -46,168 +46,109 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Header - Always Visible at all zoom levels */}
-      <div className="border-b border-gray-200 px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3 md:gap-4">
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 min-w-0">
-            <div className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <Cloud size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col">
+
+      {/* Header */}
+      <div className="sticky top-0 z-10 backdrop-blur bg-white/70 border-b border-gray-200 px-4 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow">
+              <Cloud size={22} className="text-white" />
             </div>
-            <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 whitespace-nowrap truncate">CloudNest</span>
+            <span className="text-xl font-bold text-gray-900">CloudNest</span>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0">
-            <a href="#" className="text-xs sm:text-xs md:text-sm text-gray-600 hover:text-gray-900 transition-colors whitespace-nowrap text-center">
-              Learn more
-            </a>
-            <a href="#" className="text-xs sm:text-xs md:text-sm text-gray-600 hover:text-gray-900 transition-colors whitespace-nowrap text-center">
-              Pricing
-            </a>
+          <div className="flex gap-4 text-sm text-gray-600">
+            <a href="#" className="hover:text-blue-600">Learn more</a>
+            <a href="#" className="hover:text-blue-600">Pricing</a>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-3 sm:px-4 py-8 sm:py-12">
-        <div className="w-full max-w-md sm:max-w-lg">
-          {/* Hero Section */}
-          <div className="mb-6 sm:mb-8 text-center px-2 sm:px-0">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 leading-tight">
-              {isSignUp ? "Create your account" : "Sign in to CloudNest"}
+      {/* Main */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+
+          {/* Hero */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-extrabold text-gray-900">
+              {isSignUp ? "Create your account" : "Welcome back 👋"}
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600">
-              {isSignUp
-                ? "Get started with your cloud storage today"
-                : "Access your files from anywhere"}
+            <p className="text-gray-600 mt-1">
+              {isSignUp ? "Start storing files securely" : "Sign in to continue"}
             </p>
           </div>
 
-          {/* Form Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8 shadow-sm">
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
-              {/* Name Field (Sign Up Only) */}
+          {/* Glass Card */}
+          <div className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white shadow-xl p-6 sm:p-8 transition-all">
+
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+
               {isSignUp && (
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 flex-shrink-0">
-                    <User size={16} className="sm:w-5 sm:h-5" />
-                  </div>
+                <div className="relative group">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500" size={18} />
                   <Input
-                    id="name"
-                    placeholder="Your name"
                     {...form.register("name")}
-                    className="pl-9 sm:pl-10 w-full rounded-lg border border-gray-300 bg-gray-50 py-2 sm:py-3 px-3 sm:px-4 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Your name"
+                    className="pl-10 py-3 rounded-xl border-gray-200 bg-white/80 focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               )}
 
-              {/* Email Field */}
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 flex-shrink-0">
-                  <Mail size={16} className="sm:w-5 sm:h-5" />
-                </div>
+              <div className="relative group">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500" size={18} />
                 <Input
-                  id="email"
                   type="email"
-                  // placeholder="Email address"
+                  placeholder="Email address"
                   {...form.register("email")}
-                  className="pl-9 sm:pl-10 w-full rounded-lg border border-gray-300 bg-gray-50 py-2 sm:py-3 px-3 sm:px-4 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="pl-10 py-3 rounded-xl border-gray-200 bg-white/80 focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              {/* Password Field */}
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 flex-shrink-0">
-                  <Lock size={16} className="sm:w-5 sm:h-5" />
-                </div>
+              <div className="relative group">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500" size={18} />
                 <Input
-                  id="password"
                   type="password"
-                  // placeholder="Password"
+                  placeholder="Password"
                   {...form.register("password")}
-                  className="pl-9 sm:pl-10 w-full rounded-lg border border-gray-300 bg-gray-50 py-2 sm:py-3 px-3 sm:px-4 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="pl-10 py-3 rounded-xl border-gray-200 bg-white/80 focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 sm:py-3 px-3 sm:px-4 text-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4 sm:mt-6"
                 disabled={isLoading}
+                className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
-                    <span className="inline-block w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0"></span>
-                    <span className="text-xs sm:text-sm">Loading...</span>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    Loading...
                   </>
                 ) : (
                   <>
-                    <span className="text-xs sm:text-sm">{isSignUp ? "Create account" : "Sign in"}</span>
-                    <ArrowRight size={16} className="flex-shrink-0" />
+                    {isSignUp ? "Create account" : "Sign in"}
+                    <ArrowRight size={18} />
                   </>
                 )}
               </Button>
             </form>
 
-            {/* Divider */}
-            <div className="my-4 sm:my-6 flex items-center gap-3">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">or</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
-
-            {/* Toggle Auth Mode */}
-            <div className="text-center">
-              <p className="text-xs sm:text-sm text-gray-600">
-                {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-                >
-                  {isSignUp ? "Sign in" : "Sign up"}
-                </button>
-              </p>
-            </div>
-          </div>
-
-          {/* Features */}
-          <div className="mt-8 sm:mt-12 grid grid-cols-3 gap-3 sm:gap-4">
-            <div className="text-center">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-50 rounded-lg flex items-center justify-center mx-auto mb-1 sm:mb-2 flex-shrink-0">
-                <Cloud size={20} className="sm:w-6 sm:h-6 text-blue-600 flex-shrink-0" />
-              </div>
-              <p className="text-xs text-gray-600 leading-tight">Secure storage</p>
-            </div>
-            <div className="text-center">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-50 rounded-lg flex items-center justify-center mx-auto mb-1 sm:mb-2 flex-shrink-0">
-                <Cloud size={20} className="sm:w-6 sm:h-6 text-blue-600 flex-shrink-0" />
-              </div>
-              <p className="text-xs text-gray-600 leading-tight">Easy access</p>
-            </div>
-            <div className="text-center">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-50 rounded-lg flex items-center justify-center mx-auto mb-1 sm:mb-2 flex-shrink-0">
-                <Cloud size={20} className="sm:w-6 sm:h-6 text-blue-600 flex-shrink-0" />
-              </div>
-              <p className="text-xs text-gray-600 leading-tight">Share files</p>
-            </div>
+            {/* Toggle */}
+            <p className="text-sm text-center text-gray-600 mt-6">
+              {isSignUp ? "Already have an account?" : "New here?"}{" "}
+              <button
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-blue-600 font-semibold hover:underline"
+              >
+                {isSignUp ? "Sign in" : "Create account"}
+              </button>
+            </p>
           </div>
 
           {/* Footer */}
-          <div className="mt-8 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 text-center text-xs text-gray-500 space-y-1">
-            <p className="flex flex-wrap justify-center gap-1 sm:gap-2">
-              <a href="#" className="hover:text-gray-700">
-                Privacy & Cookies
-              </a>
-              <span>•</span>
-              <a href="#" className="hover:text-gray-700">
-                Legal
-              </a>
-              <span>•</span>
-              <a href="#" className="hover:text-gray-700">
-                Accessibility
-              </a>
-            </p>
-          </div>
+          <p className="mt-8 text-center text-xs text-gray-500">
+            Privacy • Legal • Accessibility
+          </p>
         </div>
       </div>
     </div>

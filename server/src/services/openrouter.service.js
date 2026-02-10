@@ -1,9 +1,7 @@
-import { OpenRouter } from "@openrouter/sdk";
 import { ApiError } from "../utils/ApiError.js";
 
-const openrouter = new OpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
 const MAX_RETRIES = 3;
 const INITIAL_DELAY = 1000; // 1 second
@@ -83,21 +81,36 @@ export const summarizeWithOpenRouter = async (text) => {
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const completion = await openrouter.chat.send({
-        model: "deepseek/deepseek-r1-0528:free",
-        messages: [
-          {
-            role: "system",
-            content: "You are an expert at summarizing PDF documents clearly and concisely.",
-          },
-          {
-            role: "user",
-            content: `Summarize the following document:\n\n${text}`,
-          },
-        ],
+      const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "deepseek/deepseek-r1-0528:free",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert at summarizing PDF documents clearly and concisely.",
+            },
+            {
+              role: "user",
+              content: `Summarize the following document:\n\n${text}`,
+            },
+          ],
+        }),
       });
 
-      return completion.choices[0].message.content;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
     } catch (error) {
       lastError = error;
       const { code: errorCode, message: errorMessage, nestedError } = extractErrorDetails(error);

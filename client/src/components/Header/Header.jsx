@@ -14,15 +14,21 @@ function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 shadow">
-      <nav className="border-gray-200 bg-background py-2.5">
+    <header className="sticky top-0 z-50 backdrop-blur bg-white/80 shadow-sm border-b">
+      <nav className="py-3">
         <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between px-4">
-          <Link to="/dashboard" className="flex items-center">
-            <img src={Logo} className="mr-3 h-12" alt="KitaabKosh Logo" />
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <img
+              src={Logo}
+              className="h-11 w-auto transition-transform hover:scale-105"
+              alt="KitaabKosh Logo"
+            />
           </Link>
+
+          {/* Mobile Toggle */}
           <button
             type="button"
-            className="ml-auto inline-flex items-center rounded-lg p-2 text-sm text-[#042546] hover:bg-gray-100 focus:outline-none lg:hidden"
+            className="ml-auto inline-flex items-center rounded-xl p-2 text-sm text-[#042546] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#98793E]/40 lg:hidden transition"
             aria-controls="navbar"
             aria-expanded={isMenuOpen}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -48,77 +54,63 @@ function Header() {
             </svg>
           </button>
 
+          {/* Menu */}
           <div
             className={`${
-              isMenuOpen ? "block" : "hidden"
-            } w-full items-center justify-between lg:order-1 lg:flex lg:w-auto`}
+              isMenuOpen ? "block animate-fadeIn" : "hidden"
+            } w-full lg:order-1 lg:flex lg:w-auto`}
             id="navbar"
           >
-            <ul className="mt-4 flex flex-col items-center font-medium lg:mt-0 lg:flex-row lg:space-x-8">
-              <li>
-                <NavLink
-                  to="/dashboard"
-                  className={({ isActive }) =>
-                    `block py-2 pl-3 pr-4 ${
-                      isActive ? "text-[#98793E]" : "text-[#042546]"
-                    } border-b border-gray-100 hover:bg-gray-50 hover:text-[#745c30] lg:border-0 lg:p-0 lg:hover:bg-transparent`
-                  }
-                >
-                  Home
-                </NavLink>
-              </li>
+            <ul className="mt-6 flex flex-col items-center gap-4 rounded-2xl bg-white p-4 shadow-md lg:mt-0 lg:flex-row lg:gap-8 lg:bg-transparent lg:p-0 lg:shadow-none">
+              {[
+                { to: "/dashboard", label: "Home" },
+                { to: "/about", label: "About" },
+                { to: "/contact", label: "Contact Us" },
+              ].map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    className={({ isActive }) =>
+                      `relative px-3 py-2 text-sm font-medium transition
+                       ${
+                         isActive
+                           ? "text-[#98793E]"
+                           : "text-[#042546] hover:text-[#745c30]"
+                       }
+                       after:absolute after:-bottom-1 after:left-1/2 after:h-[2px] after:w-0 after:-translate-x-1/2 after:bg-[#98793E] after:transition-all after:duration-300
+                       ${isActive ? "after:w-6" : "hover:after:w-6"}`
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
 
-              <li>
-                <NavLink
-                  to="/about"
-                  className={({ isActive }) =>
-                    `block py-2 pl-3 pr-4 ${
-                      isActive ? "text-[#98793E]" : "text-[#042546]"
-                    } border-b border-gray-100 hover:bg-gray-50 hover:text-[#745c30] lg:border-0 lg:p-0 lg:hover:bg-transparent`
-                  }
-                >
-                  About
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/contact" 
-                  className={({ isActive }) =>
-                    `block py-2 pl-3 pr-4 ${
-                      isActive ? "text-[#98793E]" : "text-[#042546]"
-                    } border-b border-gray-100 hover:bg-gray-50 hover:text-[#745c30] lg:border-0 lg:p-0 lg:hover:bg-transparent`
-                  }
-                >
-                  Contact Us
-                </NavLink>
-              </li>
               {user ? (
                 <>
                   <li>
-                    <span className="text-[#042546]">
-                      Welcome, {user.name}
+                    <span className="rounded-full bg-[#98793E]/10 px-4 py-1.5 text-sm text-[#042546]">
+                      👋 {user.name}
                     </span>
                   </li>
                   <li>
                     <button
                       onClick={handleLogout}
-                      className="text-back mr-2 rounded-lg bg-[#98793E] px-4 py-2 text-sm font-medium hover:bg-[#745c30] lg:px-5 lg:py-2.5"
+                      className="rounded-xl bg-gradient-to-r from-[#98793E] to-[#745c30] px-5 py-2 text-sm font-medium text-white shadow hover:shadow-lg transition active:scale-95"
                     >
                       Logout
                     </button>
                   </li>
                 </>
               ) : (
-                <div className="py-3">
-                  <li>
-                    <Link
-                      to="/"
-                      className="text-back mr-2 rounded-lg bg-[#98793E] px-4 py-2 text-sm font-medium hover:bg-[#745c30] lg:px-5 lg:py-2.5"
-                    >
-                      Log in
-                    </Link>
-                  </li>
-                </div>
+                <li>
+                  <Link
+                    to="/"
+                    className="rounded-xl bg-gradient-to-r from-[#98793E] to-[#745c30] px-5 py-2 text-sm font-medium text-white shadow hover:shadow-lg transition active:scale-95"
+                  >
+                    Log in
+                  </Link>
+                </li>
               )}
             </ul>
           </div>

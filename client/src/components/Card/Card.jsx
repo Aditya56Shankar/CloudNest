@@ -52,39 +52,52 @@ function Card({
   return (
     <>
       {view === "list" ? (
-        <tr>
-          <td className="px-6 py-2">{title}</td>
-          <td className="px-6 py-2">{author}</td>
-          <td className="px-6 py-2">{description}</td>
-          <td className="px-6 py-2">{isPublic ? "Public" : "Private"}</td>
-          <td className="px-6 py-2">{formattedDate}</td>
-          <td className="px-6 py-2">
-            {fileUrl && (
+        <tr className="border-b hover:bg-gray-50 transition">
+          <td className="px-6 py-3 font-medium text-gray-800">{title}</td>
+          <td className="px-6 py-3 text-gray-600">{author}</td>
+          <td className="px-6 py-3 text-gray-600 line-clamp-2">{description}</td>
+          <td className="px-6 py-3">
+            <span
+              className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                isPublic
+                  ? "bg-green-100 text-green-700"
+                  : "bg-yellow-100 text-yellow-700"
+              }`}
+            >
+              {isPublic ? "Public" : "Private"}
+            </span>
+          </td>
+          <td className="px-6 py-3 text-gray-500">{formattedDate}</td>
+          <td className="px-6 py-3">
+            <div className="flex flex-wrap gap-2">
+              {fileUrl && (
+                <button
+                  className="rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1.5 text-white shadow hover:shadow-lg transition active:scale-95"
+                  onClick={handleDownload}
+                >
+                  Download
+                </button>
+              )}
               <button
-                className="w-full rounded bg-green-500 px-4 py-1 text-background transition duration-300 hover:bg-green-600"
-                onClick={handleDownload}
+                onClick={handleEdit}
+                className="rounded-lg bg-gradient-to-r from-[#98793E] to-[#745c30] px-3 py-1.5 text-white shadow hover:shadow-lg transition active:scale-95"
               >
-                Download
+                Edit
               </button>
-            )}
-            <button
-              onClick={handleEdit}
-              className="mb-2 mr-2 rounded bg-[#98793E] px-3 py-1 text-background transition duration-300 hover:bg-[#745c30]"
-            >
-              Edit
-            </button>
-
-            <button
-              onClick={openModal}
-              className="rounded bg-red-500 px-3 py-1 text-background transition duration-300 hover:bg-red-600"
-            >
-              Delete
-            </button>
+              <button
+                onClick={openModal}
+                className="rounded-lg bg-gradient-to-r from-red-500 to-rose-600 px-3 py-1.5 text-white shadow hover:shadow-lg transition active:scale-95"
+              >
+                Delete
+              </button>
+            </div>
           </td>
         </tr>
       ) : (
-        <div className="h-min w-72 rounded-lg bg-background p-6 shadow-md">
-          <h2 className="mb-2 text-xl font-bold text-gray-800">{title}</h2>
+        <div className="group h-min w-72 rounded-2xl bg-white/80 backdrop-blur border border-gray-200 p-5 shadow-md hover:shadow-xl transition-all hover:-translate-y-1">
+          <h2 className="mb-2 text-lg font-bold text-gray-800 group-hover:text-[#98793E] transition">
+            {title}
+          </h2>
 
           <p className="mb-1 text-sm text-gray-600">
             <span className="font-semibold">Author:</span> {author}
@@ -105,38 +118,38 @@ function Card({
           <p className="mb-1 text-sm text-gray-600">
             <span className="font-semibold">Visibility:</span>{" "}
             <span
-              className={`inline-block rounded-full px-2 py-0.5 text-xs ${
+              className={`ml-1 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
                 isPublic
-                  ? "bg-green-100 text-green-800"
-                  : "bg-yellow-100 text-yellow-800"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-yellow-100 text-yellow-700"
               }`}
             >
               {isPublic ? "Public" : "Private"}
             </span>
           </p>
 
-          <p className="mb-4 text-sm text-gray-600">
-            <span className="font-semibold">Added on:</span> {formattedDate}
+          <p className="mb-4 text-xs text-gray-500">
+            Added on: {formattedDate}
           </p>
 
           <div className="flex flex-col gap-2">
-            <div className="flex justify-between gap-2">
+            <div className="flex gap-2">
               {fileUrl && (
                 <button
-                  className="w-full rounded bg-green-500 px-4 py-1 text-background transition duration-300 hover:bg-green-600"
+                  className="flex-1 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1.5 text-white shadow hover:shadow-lg transition active:scale-95"
                   onClick={handleDownload}
                 >
                   Download
                 </button>
               )}
               <button
-                className="flex-1 rounded bg-[#98793E] px-4 py-1 text-background transition duration-300 hover:bg-[#745c30]"
+                className="flex-1 rounded-lg bg-gradient-to-r from-[#98793E] to-[#745c30] px-3 py-1.5 text-white shadow hover:shadow-lg transition active:scale-95"
                 onClick={handleEdit}
               >
                 Edit
               </button>
               <button
-                className="flex-1 rounded bg-red-500 px-4 py-1 text-background transition duration-300 hover:bg-red-600"
+                className="flex-1 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 px-3 py-1.5 text-white shadow hover:shadow-lg transition active:scale-95"
                 onClick={openModal}
               >
                 Delete
@@ -147,15 +160,25 @@ function Card({
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
-            <p>Are you sure you want to delete this item?</p>
-            <div className="mt-4 flex justify-end space-x-4">
-              <button onClick={closeModal} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-scaleIn">
+            <h2 className="mb-2 text-lg font-bold text-gray-800">
+              Confirm Delete
+            </h2>
+            <p className="text-sm text-gray-600">
+              Are you sure you want to delete this item? This action cannot be undone.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={closeModal}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+              >
                 Cancel
               </button>
-              <button onClick={handleDelete} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+              <button
+                onClick={handleDelete}
+                className="rounded-lg bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2 text-sm text-white shadow hover:shadow-lg transition active:scale-95"
+              >
                 Delete
               </button>
             </div>

@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 import express from "express";
 
 import connectDB from "./config/db.js";
-import { errorHandler } from "./middleware/error.js";
 import authRoutes from "./routes/auth.js";
 import bookRoutes from "./routes/books.js";
 import pdfRoutes from "./routes/pdf.js";
@@ -34,7 +33,6 @@ app.use(
 );
 
 
-
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -44,19 +42,15 @@ app.use(
   })
 );
 
-
 app.use(express.json());
 app.use(express.static("public"));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
 
 
 app.use("/api/books", bookRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/pdf", pdfRoutes);
+app.use("/api/books", pdfRoutes);
 
-// Error handler middleware (must be last)
-app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

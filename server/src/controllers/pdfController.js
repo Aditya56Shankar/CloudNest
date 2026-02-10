@@ -1,5 +1,5 @@
-import { OpenAI } from "openai";
 import { createRequire } from "module";
+import { summarizeWithOpenRouter } from "../services/openrouter.service.js";
 
 const require = createRequire(import.meta.url);
 const parsePdf = require("../utils/pdfParse.cjs");
@@ -10,33 +10,23 @@ export const summarizePDF = async (req, res) => {
       return res.status(400).json({ message: "PDF file is required" });
     }
 
-    const pdfData = await parsePdf(req.file.buffer);
+    const pdfText = await parsePdf(req.file.buffer);
 
-    if (!pdfData.text || pdfData.text.trim().length === 0) {
+    if (!pdfText || pdfText.trim().length === 0) {
       return res
         .status(400)
         .json({ message: "No readable text found in PDF" });
     }
 
-    const text = pdfData.text.slice(0, 12000);
+    const text = pdfText.slice(0, 12000);
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "Summarize the document clearly." },
-        { role: "user", content: text },
-      ],
-    });
+    const summary = await summarizeWithOpenRouter(text);
 
     res.json({
-      summary: response.choices[0].message.content,
+      summary: summary,
     });
   } catch (err) {
     console.error("PDF summary error:", err);
-    res.status(500).json({ message: "PDF summary failed" });
+    res.status(500).json({ message: err.message || "PDF summary failed" });
   }
 };

@@ -40,8 +40,8 @@ export default function DriveDashboard() {
     totalStorage: 15360 // 15GB in MB
   });
   const [isSummarizing, setIsSummarizing] = useState(false);
-  const [summaryText, setSummaryText] = useState("");
-  const [showSummaryModal, setShowSummaryModal] = useState(false);
+const [summaryText, setSummaryText] = useState("");
+const [showSummaryModal, setShowSummaryModal] = useState(false);
 
 
   const isTrash = currentFolder === "trash";
@@ -281,49 +281,52 @@ export default function DriveDashboard() {
   //============================ summaryText==========================
 
   const handleSummarizePDF = async (file) => {
-    if (!file.fileUrl) {
-      toast.error("File URL not available");
-      return;
-    }
+  if (!file.fileUrl) {
+    toast.error("File URL not available");
+    return;
+  }
 
-    try {
-      setIsSummarizing(true);
-      setSummaryText("");
-      setShowSummaryModal(true);
+  try {
+    setIsSummarizing(true);
+    setSummaryText("");
+    setShowSummaryModal(true);
 
-      // ✅ SEND URL TO BACKEND (NO FRONTEND FETCH)
-      const response = await fetch(
-        "http://localhost:3000/api/pdf/summarize-by-url",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            pdfUrl: file.fileUrl,
-          }),
-          credentials: "include",
-        }
-      );
+    // 1️⃣ Fetch the PDF as blob
+    const pdfResponse = await fetch(file.fileUrl);
+    const pdfBlob = await pdfResponse.blob();
 
-      const data = await response.json();
+    // 2️⃣ Convert to File
+    const pdfFile = new File([pdfBlob], file.title || "document.pdf", {
+      type: "application/pdf",
+    });
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to summarize PDF");
+    // 3️⃣ Send to backend
+    const formData = new FormData();
+    formData.append("pdf", pdfFile);
+
+    const response = await fetch(
+      "http://localhost:3000/api/books/summary",
+      {
+        method: "POST",
+        body: formData,
+        credentials: "include",
       }
+    );
 
-      // ✅ Correct response access
-      setSummaryText(data.data.summary);
+    const data = await response.json();
 
-    } catch (error) {
-      console.error(error);
-      toast.error(error.message || "PDF summarization failed");
-      setShowSummaryModal(false);
-    } finally {
-      setIsSummarizing(false);
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to summarize PDF");
     }
-  };
 
+    setSummaryText(data.summary);
+  } catch (error) {
+    toast.error(error.message || "PDF summarization failed");
+    setShowSummaryModal(false);
+  } finally {
+    setIsSummarizing(false);
+  }
+};
 
   /* ================= UI ================= */
 
@@ -348,7 +351,7 @@ export default function DriveDashboard() {
                 {filteredFiles.length} items
               </p>
             </div>
-
+           
 
 
             <input
@@ -377,73 +380,73 @@ export default function DriveDashboard() {
           <div className="flex-1 overflow-auto bg-gray-50">
             {viewMode === "grid" ? (
               <FileGridView
-                files={filteredFiles}
-                isTrash={isTrash}
-                onDelete={handleDelete}
-                onRestore={handleRestore}
-                onPermanentDelete={handlePermanentDelete}
-                onOpen={handleOpen}
-                onDownload={handleDownload}
-                onShare={handleShare}
-                onRename={handleRename}
-                onToggleStar={handleToggleStar}
-                onSummarize={handleSummarizePDF}   // 👈 ADD THIS
-              />
+  files={filteredFiles}
+  isTrash={isTrash}
+  onDelete={handleDelete}
+  onRestore={handleRestore}
+  onPermanentDelete={handlePermanentDelete}
+  onOpen={handleOpen}
+  onDownload={handleDownload}
+  onShare={handleShare}
+  onRename={handleRename}
+  onToggleStar={handleToggleStar}
+  onSummarize={handleSummarizePDF}   // 👈 ADD THIS
+/>
 
 
             ) : (
               <FileListView
-                files={filteredFiles}
-                isTrash={isTrash}
-                onDelete={handleDelete}
-                onRestore={handleRestore}
-                onPermanentDelete={handlePermanentDelete}
-                onOpen={handleOpen}
-                onDownload={handleDownload}
-                onShare={handleShare}
-                onRename={handleRename}
-                onToggleStar={handleToggleStar}
-                onSummarize={handleSummarizePDF}   // 👈 ADD THIS
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                onSort={(by) => {
-                  setSortOrder(
-                    sortBy === by && sortOrder === "asc" ? "desc" : "asc"
-                  );
-                  setSortBy(by);
-                }}
-              />
+  files={filteredFiles}
+  isTrash={isTrash}
+  onDelete={handleDelete}
+  onRestore={handleRestore}
+  onPermanentDelete={handlePermanentDelete}
+  onOpen={handleOpen}
+  onDownload={handleDownload}
+  onShare={handleShare}
+  onRename={handleRename}
+  onToggleStar={handleToggleStar}
+  onSummarize={handleSummarizePDF}   // 👈 ADD THIS
+  sortBy={sortBy}
+  sortOrder={sortOrder}
+  onSort={(by) => {
+    setSortOrder(
+      sortBy === by && sortOrder === "asc" ? "desc" : "asc"
+    );
+    setSortBy(by);
+  }}
+/>
 
             )}
           </div>
         )}
       </div>
       {showSummaryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg">
-            <h3 className="mb-4 text-lg font-semibold">📄 PDF Summary</h3>
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg">
+      <h3 className="mb-4 text-lg font-semibold">📄 PDF Summary</h3>
 
-            {isSummarizing ? (
-              <div className="flex justify-center py-10">
-                <Loader />
-              </div>
-            ) : (
-              <div className="max-h-[400px] overflow-y-auto whitespace-pre-wrap text-sm text-gray-700">
-                {summaryText}
-              </div>
-            )}
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setShowSummaryModal(false)}
-                className="rounded-md border px-4 py-2 text-sm"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+      {isSummarizing ? (
+        <div className="flex justify-center py-10">
+          <Loader />
+        </div>
+      ) : (
+        <div className="max-h-[400px] overflow-y-auto whitespace-pre-wrap text-sm text-gray-700">
+          {summaryText}
         </div>
       )}
+
+      <div className="mt-6 flex justify-end gap-3">
+        <button
+          onClick={() => setShowSummaryModal(false)}
+          className="rounded-md border px-4 py-2 text-sm"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
     </div>
   );
