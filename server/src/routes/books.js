@@ -268,23 +268,6 @@ router.put(
   })
 );
 
-//restore put
-router.put("/:id/restore", authenticate, async (req, res) => {
-  const book = await Book.findById(req.params.id);
-
-  if (!book) return res.status(404).json({ error: "Book not found" });
-
-  if (String(book.userId) !== String(req.user._id)) {
-    return res.status(403).json({ error: "Not authorized" });
-  }
-
-  book.isDeleted = false;
-  book.deletedAt = null;
-  await book.save();
-
-  res.json({ message: "Book restored successfully" });
-});
-
 // RESTORE BOOK FROM TRASH
 router.put("/:id/restore", authenticate, async (req, res) => {
   try {
@@ -351,7 +334,7 @@ router.delete("/:id", authenticate, async (req, res) => {
   }
 });
 
-// RESTORE BOOK delete
+// PERMANENT DELETE
 router.delete("/:id/permanent", authenticate, async (req, res) => {
   const book = await Book.findById(req.params.id);
 

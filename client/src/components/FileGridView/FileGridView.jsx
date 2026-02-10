@@ -136,11 +136,10 @@ function FileGridItem({
       onContextMenu={onContextMenu}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className={`relative p-3 rounded-lg border-2 cursor-pointer transition ${
-        isSelected
+      className={`relative p-3 rounded-lg border-2 cursor-pointer transition ${isSelected
           ? "border-blue-500 bg-blue-50"
           : "border-transparent hover:border-gray-200 bg-gray-50"
-      }`}
+        }`}
       onClick={onToggleSelect}
     >
       <div className="flex justify-center mb-2" onClick={(e) => {
@@ -154,23 +153,48 @@ function FileGridItem({
 
       {isHovered && (
         <div className="absolute bottom-2 right-2 flex gap-1">
-          {isPDF && (
-            <ActionButton
-              icon={<FileText size={16} />}
-              title="Summarize PDF"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSummarize();
-              }}
-            />
+          {isTrash ? (
+            <>
+              <ActionButton
+                icon={<RotateCcw size={16} />}
+                title="Restore"
+                className="text-green-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRestore();
+                }}
+              />
+              <ActionButton
+                icon={<Trash2 size={16} />}
+                title="Delete Forever"
+                className="text-red-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPermanentDelete();
+                }}
+              />
+            </>
+          ) : (
+            <>
+              {isPDF && (
+                <ActionButton
+                  icon={<FileText size={16} />}
+                  title="Summarize PDF"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSummarize();
+                  }}
+                />
+              )}
+              <ActionButton icon={<Download size={16} />} onClick={onDownload} />
+              <ActionButton icon={<Share2 size={16} />} onClick={onShare} />
+              <ActionButton
+                icon={<Trash2 size={16} />}
+                className="text-red-600"
+                onClick={onDelete}
+              />
+            </>
           )}
-          <ActionButton icon={<Download size={16} />} onClick={onDownload} />
-          <ActionButton icon={<Share2 size={16} />} onClick={onShare} />
-          <ActionButton
-            icon={<Trash2 size={16} />}
-            className="text-red-600"
-            onClick={onDelete}
-          />
         </div>
       )}
 
@@ -211,41 +235,66 @@ function ContextMenu({
         className="fixed z-20 bg-white rounded-lg shadow border py-2 min-w-[200px]"
         style={{ left: x, top: y }}
       >
-        {!isTrash && isPDF && (
-          <MenuItem
-            icon={<FileText size={16} />}
-            label="Summarize PDF"
-            onClick={() => {
-              onSummarize(file);
-              onClose();
-            }}
-          />
+        {isTrash ? (
+          <>
+            <MenuItem
+              icon={<RotateCcw size={16} />}
+              label="Restore"
+              className="text-green-600"
+              onClick={() => {
+                onRestore(file._id);
+                onClose();
+              }}
+            />
+            <MenuItem
+              icon={<Trash2 size={16} />}
+              label="Delete Forever"
+              className="text-red-600"
+              onClick={() => {
+                onPermanentDelete(file._id);
+                onClose();
+              }}
+            />
+          </>
+        ) : (
+          <>
+            {isPDF && (
+              <MenuItem
+                icon={<FileText size={16} />}
+                label="Summarize PDF"
+                onClick={() => {
+                  onSummarize(file);
+                  onClose();
+                }}
+              />
+            )}
+            <MenuItem
+              icon={<Download size={16} />}
+              label="Download"
+              onClick={() => {
+                onDownload(file);
+                onClose();
+              }}
+            />
+            <MenuItem
+              icon={<Share2 size={16} />}
+              label="Share"
+              onClick={() => {
+                onShare(file);
+                onClose();
+              }}
+            />
+            <MenuItem
+              icon={<Trash2 size={16} />}
+              label="Move to Trash"
+              className="text-red-600"
+              onClick={() => {
+                onDelete(file._id);
+                onClose();
+              }}
+            />
+          </>
         )}
-        <MenuItem
-          icon={<Download size={16} />}
-          label="Download"
-          onClick={() => {
-            onDownload(file);
-            onClose();
-          }}
-        />
-        <MenuItem
-          icon={<Share2 size={16} />}
-          label="Share"
-          onClick={() => {
-            onShare(file);
-            onClose();
-          }}
-        />
-        <MenuItem
-          icon={<Trash2 size={16} />}
-          label="Move to Trash"
-          className="text-red-600"
-          onClick={() => {
-            onDelete(file._id);
-            onClose();
-          }}
-        />
       </div>
     </>
   );

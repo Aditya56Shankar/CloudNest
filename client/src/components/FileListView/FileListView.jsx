@@ -7,6 +7,7 @@ import {
   Heart,
   Image,
   Music,
+  RotateCcw,
   Share2,
   Trash2,
   Video,
@@ -28,8 +29,11 @@ function getFileIcon(fileName) {
 
 export default function FileListView({
   files,
+  isTrash = false,
   onDownload,
   onDelete,
+  onRestore,
+  onPermanentDelete,
   onShare,
   onRename,
   onOpen,
@@ -87,9 +91,12 @@ export default function FileListView({
                 <FileListItem
                   key={file._id}
                   file={file}
+                  isTrash={isTrash}
                   isLast={idx === sortedFiles.length - 1}
                   onDownload={() => onDownload(file)}
                   onDelete={() => onDelete(file._id)}
+                  onRestore={() => onRestore?.(file._id)}
+                  onPermanentDelete={() => onPermanentDelete?.(file._id)}
                   onShare={() => onShare(file)}
                   onRename={() => onRename(file)}
                   onOpen={() => onOpen(file)}
@@ -106,9 +113,12 @@ export default function FileListView({
 
 function FileListItem({
   file,
+  isTrash,
   isLast,
   onDownload,
   onDelete,
+  onRestore,
+  onPermanentDelete,
   onShare,
   onOpen,
   onToggleStar,
@@ -138,27 +148,46 @@ function FileListItem({
       <td className="px-6 py-3 text-right">
         {showActions && (
           <div className="flex justify-end gap-2">
-            <ActionIconButton
-              icon={<Heart size={16} className={file.isStarred ? "fill-yellow-400 text-yellow-400" : ""} />}
-              onClick={onToggleStar}
-              title={file.isStarred ? "Unstar" : "Star"}
-            />
-            <ActionIconButton
-              icon={<Download size={16} />}
-              onClick={onDownload}
-              title="Download"
-            />
-            <ActionIconButton
-              icon={<Share2 size={16} />}
-              onClick={onShare}
-              title="Share"
-            />
-            <ActionIconButton
-              icon={<Trash2 size={16} />}
-              onClick={onDelete}
-              title="Delete"
-              className="text-red-600 hover:text-red-700"
-            />
+            {isTrash ? (
+              <>
+                <ActionIconButton
+                  icon={<RotateCcw size={16} />}
+                  onClick={onRestore}
+                  title="Restore"
+                  className="text-green-600 hover:text-green-700"
+                />
+                <ActionIconButton
+                  icon={<Trash2 size={16} />}
+                  onClick={onPermanentDelete}
+                  title="Delete Forever"
+                  className="text-red-600 hover:text-red-700"
+                />
+              </>
+            ) : (
+              <>
+                <ActionIconButton
+                  icon={<Heart size={16} className={file.isStarred ? "fill-yellow-400 text-yellow-400" : ""} />}
+                  onClick={onToggleStar}
+                  title={file.isStarred ? "Unstar" : "Star"}
+                />
+                <ActionIconButton
+                  icon={<Download size={16} />}
+                  onClick={onDownload}
+                  title="Download"
+                />
+                <ActionIconButton
+                  icon={<Share2 size={16} />}
+                  onClick={onShare}
+                  title="Share"
+                />
+                <ActionIconButton
+                  icon={<Trash2 size={16} />}
+                  onClick={onDelete}
+                  title="Delete"
+                  className="text-red-600 hover:text-red-700"
+                />
+              </>
+            )}
           </div>
         )}
       </td>
