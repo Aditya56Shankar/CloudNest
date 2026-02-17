@@ -4,19 +4,13 @@ import { toast } from "sonner";
 
 import DriveSidebar from "../components/DriveSidebar/DriveSidebar";
 import FileGridView from "../components/FileGridView/FileGridView";
-import FileListView from "../components/FileListView/FileListView";
 import UploadArea from "../components/UploadArea/UploadArea";
 import Loader from "../components/ui/Loader";
 
 import {
-  deleteBookPermanently,
   getMyBooks,
-  getRecentBooks,
-  getStarredBooks,
   getStorageStats,
-  getTrashBooks,
   moveBookToTrash,
-  restoreTrash,
   toggleStar,
   updateBook
 } from "../lib/queries";
@@ -29,24 +23,15 @@ export default function DriveDashboard() {
 
   const [files, setFiles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUploading] = useState(false);
-  const [viewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentFolder, setCurrentFolder] = useState("my-files");
-  const [sortBy, setSortBy] = useState("name");
-  const [sortOrder, setSortOrder] = useState("asc");
+  const currentFolder = "my-files";
   const [storageStats, setStorageStats] = useState({
     usedStorage: 0,
     totalStorage: 15360 // 15GB in MB
   });
   const [isSummarizing, setIsSummarizing] = useState(false);
-const [summaryText, setSummaryText] = useState("");
-const [showSummaryModal, setShowSummaryModal] = useState(false);
-
-
-  const isTrash = currentFolder === "trash";
-  const isStarred = currentFolder === "starred";
-  const isRecent = currentFolder === "recent";
+  const [summaryText, setSummaryText] = useState("");
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
 
   /* ================= AUTH GUARD ================= */
 
@@ -54,22 +39,26 @@ const [showSummaryModal, setShowSummaryModal] = useState(false);
     if (!user) navigate("/");
   }, [user, navigate]);
 
+  const handleFolderClick = useCallback(
+    (folder) => {
+      const folderPathMap = {
+        "my-files": "/dashboard",
+        recent: "/recent",
+        starred: "/starred",
+        trash: "/trash",
+      };
+      const targetPath = folderPathMap[folder] || "/dashboard";
+      navigate(targetPath);
+    },
+    [navigate],
+  );
+
   /* ================= FETCH FILES ================= */
 
   const fetchFiles = useCallback(async () => {
     try {
       setIsLoading(true);
-      let data;
-
-      if (isTrash) {
-        data = await getTrashBooks();
-      } else if (isStarred) {
-        data = await getStarredBooks();
-      } else if (isRecent) {
-        data = await getRecentBooks();
-      } else {
-        data = await getMyBooks();
-      }
+      const data = await getMyBooks();
 
       setFiles(data);
 
@@ -88,7 +77,7 @@ const [showSummaryModal, setShowSummaryModal] = useState(false);
     } finally {
       setIsLoading(false);
     }
-  }, [isTrash, isStarred, isRecent]);
+  }, []);
 
   useEffect(() => {
     fetchFiles();
@@ -120,29 +109,6 @@ const [showSummaryModal, setShowSummaryModal] = useState(false);
       toast.success("Moved to Trash");
     } catch {
       toast.error("Failed to move file");
-    }
-  };
-
-  // 🔄 RESTORE FROM TRASH (✅ FIXED)
-  const handleRestore = async (id) => {
-    try {
-      await restoreTrash(id);
-      setFiles((prev) => prev.filter((f) => f._id !== id));
-      toast.success("File restored successfully");
-    } catch (error) {
-      toast.error(error.message || "Restore failed");
-    }
-  };
-
-  // ❌ PERMANENT DELETE
-  const handlePermanentDelete = async (id) => {
-    if (!window.confirm("Delete permanently? This cannot be undone.")) return;
-    try {
-      await deleteBookPermanently(id);
-      setFiles((prev) => prev.filter((f) => f._id !== id));
-      toast.success("Deleted permanently");
-    } catch {
-      toast.error("Delete failed");
     }
   };
 
@@ -245,11 +211,6 @@ const [showSummaryModal, setShowSummaryModal] = useState(false);
         )
       );
 
-      // If we're in starred view and file is unstarred, remove it
-      if (isStarred && file.isStarred) {
-        setFiles((prev) => prev.filter((f) => f._id !== file._id));
-      }
-
       toast.success(result.message || (file.isStarred ? "Unstarred" : "Starred"));
     } catch (error) {
       console.error("Toggle star error:", error);
@@ -281,52 +242,52 @@ const [showSummaryModal, setShowSummaryModal] = useState(false);
   //============================ summaryText==========================
 
   const handleSummarizePDF = async (file) => {
-  if (!file.fileUrl) {
-    toast.error("File URL not available");
-    return;
-  }
-
-  try {
-    setIsSummarizing(true);
-    setSummaryText("");
-    setShowSummaryModal(true);
-
-    // 1️⃣ Fetch the PDF as blob
-    const pdfResponse = await fetch(file.fileUrl);
-    const pdfBlob = await pdfResponse.blob();
-
-    // 2️⃣ Convert to File
-    const pdfFile = new File([pdfBlob], file.title || "document.pdf", {
-      type: "application/pdf",
-    });
-
-    // 3️⃣ Send to backend
-    const formData = new FormData();
-    formData.append("pdf", pdfFile);
-
-    const response = await fetch(
-      "http://localhost:3000/api/books/summary",
-      {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to summarize PDF");
+    if (!file.fileUrl) {
+      toast.error("File URL not available");
+      return;
     }
 
-    setSummaryText(data.summary);
-  } catch (error) {
-    toast.error(error.message || "PDF summarization failed");
-    setShowSummaryModal(false);
-  } finally {
-    setIsSummarizing(false);
-  }
-};
+    try {
+      setIsSummarizing(true);
+      setSummaryText("");
+      setShowSummaryModal(true);
+
+      // 1️⃣ Fetch the PDF as blob
+      const pdfResponse = await fetch(file.fileUrl);
+      const pdfBlob = await pdfResponse.blob();
+
+      // 2️⃣ Convert to File
+      const pdfFile = new File([pdfBlob], file.title || "document.pdf", {
+        type: "application/pdf",
+      });
+
+      // 3️⃣ Send to backend
+      const formData = new FormData();
+      formData.append("pdf", pdfFile);
+
+      const response = await fetch(
+        "http://localhost:3000/api/books/summary",
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to summarize PDF");
+      }
+
+      setSummaryText(data.summary);
+    } catch (error) {
+      toast.error(error.message || "PDF summarization failed");
+      setShowSummaryModal(false);
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
 
   /* ================= UI ================= */
 
@@ -334,7 +295,7 @@ const [showSummaryModal, setShowSummaryModal] = useState(false);
     <div className="flex h-screen bg-white overflow-hidden">
       <DriveSidebar
         currentFolder={currentFolder}
-        onFolderClick={setCurrentFolder}
+        onFolderClick={handleFolderClick}
         storageUsed={storageStats.usedStorage}
         storageTotal={storageStats.totalStorage}
       />
@@ -345,13 +306,13 @@ const [showSummaryModal, setShowSummaryModal] = useState(false);
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold">
-                {isTrash ? "Trash" : isStarred ? "Starred" : isRecent ? "Recent" : "My Files"}
+                My Files
               </h2>
               <p className="text-sm text-gray-500">
                 {filteredFiles.length} items
               </p>
             </div>
-           
+
 
 
             <input
@@ -362,91 +323,59 @@ const [showSummaryModal, setShowSummaryModal] = useState(false);
               className="w-full max-w-md rounded-lg border px-4 py-2"
             />
 
-            {!isTrash && (
-              <UploadArea
-                onFileUpload={handleFileUpload}
-                isUploading={isUploading}
-              />
-            )}
+            <UploadArea
+              onFileUpload={handleFileUpload}
+              isUploading={false}
+            />
           </div>
         </div>
 
         {/* Empty State */}
         {filteredFiles.length === 0 ? (
           <div className="flex flex-1 items-center justify-center text-gray-500">
-            {isTrash ? "Trash is empty" : isStarred ? "No starred files" : isRecent ? "No recent files" : "No files found"}
+            No files found
           </div>
         ) : (
           <div className="flex-1 overflow-auto bg-gray-50">
-            {viewMode === "grid" ? (
-              <FileGridView
-  files={filteredFiles}
-  isTrash={isTrash}
-  onDelete={handleDelete}
-  onRestore={handleRestore}
-  onPermanentDelete={handlePermanentDelete}
-  onOpen={handleOpen}
-  onDownload={handleDownload}
-  onShare={handleShare}
-  onRename={handleRename}
-  onToggleStar={handleToggleStar}
-  onSummarize={handleSummarizePDF}   // 👈 ADD THIS
-/>
-
-
-            ) : (
-              <FileListView
-  files={filteredFiles}
-  isTrash={isTrash}
-  onDelete={handleDelete}
-  onRestore={handleRestore}
-  onPermanentDelete={handlePermanentDelete}
-  onOpen={handleOpen}
-  onDownload={handleDownload}
-  onShare={handleShare}
-  onRename={handleRename}
-  onToggleStar={handleToggleStar}
-  onSummarize={handleSummarizePDF}   // 👈 ADD THIS
-  sortBy={sortBy}
-  sortOrder={sortOrder}
-  onSort={(by) => {
-    setSortOrder(
-      sortBy === by && sortOrder === "asc" ? "desc" : "asc"
-    );
-    setSortBy(by);
-  }}
-/>
-
-            )}
+            <FileGridView
+              files={filteredFiles}
+              onDelete={handleDelete}
+              onOpen={handleOpen}
+              onDownload={handleDownload}
+              onShare={handleShare}
+              onRename={handleRename}
+              onToggleStar={handleToggleStar}
+              onSummarize={handleSummarizePDF}
+            />
           </div>
         )}
       </div>
       {showSummaryModal && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg">
-      <h3 className="mb-4 text-lg font-semibold">📄 PDF Summary</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg">
+            <h3 className="mb-4 text-lg font-semibold">📄 PDF Summary</h3>
 
-      {isSummarizing ? (
-        <div className="flex justify-center py-10">
-          <Loader />
-        </div>
-      ) : (
-        <div className="max-h-[400px] overflow-y-auto whitespace-pre-wrap text-sm text-gray-700">
-          {summaryText}
+            {isSummarizing ? (
+              <div className="flex justify-center py-10">
+                <Loader />
+              </div>
+            ) : (
+              <div className="max-h-[400px] overflow-y-auto whitespace-pre-wrap text-sm text-gray-700">
+                {summaryText}
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowSummaryModal(false)}
+                className="rounded-md border px-4 py-2 text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
-      <div className="mt-6 flex justify-end gap-3">
-        <button
-          onClick={() => setShowSummaryModal(false)}
-          className="rounded-md border px-4 py-2 text-sm"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
 
     </div>
   );

@@ -1,14 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowRight, Cloud, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { useNavigate } from "react-router";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 import { toast } from "sonner";
-import { useAuth } from "./auth-context";
+import * as z from "zod";
 import { signIn, signUp } from "../lib/queries";
-import { Cloud, ArrowRight, Mail, Lock, User } from "lucide-react";
+import { useAuth } from "./auth-context";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -37,7 +37,7 @@ export default function SignUpForm() {
       const result = isSignUp ? await signUp(data) : await signIn(data);
       login(result.user, result.token);
       toast.success(`Successfully ${isSignUp ? "signed up" : "signed in"}`);
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       toast.error(error.message);
     } finally {

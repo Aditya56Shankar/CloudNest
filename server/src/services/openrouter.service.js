@@ -77,6 +77,10 @@ const isRetryableError = (error) => {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const summarizeWithOpenRouter = async (text) => {
+  if (!OPENROUTER_API_KEY) {
+    throw new ApiError(500, "OPENROUTER_API_KEY is not set in the server environment");
+  }
+
   let lastError;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -102,14 +106,26 @@ export const summarizeWithOpenRouter = async (text) => {
         }),
       });
 
+      const responseText = await response.text();
+      let data;
+
+      try {
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        data = null;
+      }
+
       if (!response.ok) {
-        const errorData = await response.json();
+        const apiMessage = data?.error?.message || responseText;
         throw new Error(
-          errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`
+          apiMessage || `HTTP ${response.status}: ${response.statusText}`
         );
       }
 
-      const data = await response.json();
+      if (!data?.choices?.[0]?.message?.content) {
+        throw new Error("OpenRouter response missing summary content");
+      }
+
       return data.choices[0].message.content;
     } catch (error) {
       lastError = error;

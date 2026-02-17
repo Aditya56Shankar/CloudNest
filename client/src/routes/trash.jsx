@@ -1,78 +1,130 @@
-import React from "react";
-import { Trash2, RotateCcw } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
-export default function Trash({
-  files = [],
-  onRestore,
-  onPermanentDelete
-}) {
-  return (
-    <div className="flex-1 overflow-auto bg-gray-50 p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Trash</h1>
-        <p className="text-sm text-gray-500">
-          Items in trash will be permanently deleted after 30 days
-        </p>
+import { useAuth } from "../components/auth-context";
+import DriveSidebar from "../components/DriveSidebar/DriveSidebar";
+import FileGridView from "../components/FileGridView/FileGridView";
+import Loader from "../components/ui/Loader";
+import { deleteBookPermanently, getStorageStats, getTrashBooks, restoreTrash } from "../lib/queries";
+
+export default function Trash() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [files, setFiles] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [storageStats, setStorageStats] = useState({
+    usedStorage: 0,
+    totalStorage: 15360,
+  });
+
+  useEffect(() => {
+    if (!user) navigate("/");
+  }, [user, navigate]);
+
+  const fetchTrash = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await getTrashBooks();
+      setFiles(data);
+
+      try {
+        const stats = await getStorageStats();
+        setStorageStats({
+          usedStorage: stats.usedStorage,
+          totalStorage: stats.totalStorage,
+        });
+      } catch (error) {
+        console.error("Failed to fetch storage stats:", error);
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to load trash");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTrash();
+  }, [fetchTrash]);
+
+  const handleRestore = async (id) => {
+    try {
+      await restoreTrash(id);
+      setFiles((prev) => prev.filter((f) => f._id !== id));
+      toast.success("File restored successfully");
+    } catch (error) {
+      toast.error(error.message || "Restore failed");
+    }
+  };
+
+  const handlePermanentDelete = async (id) => {
+    if (!window.confirm("Delete permanently? This cannot be undone.")) return;
+    try {
+      await deleteBookPermanently(id);
+      setFiles((prev) => prev.filter((f) => f._id !== id));
+      toast.success("Deleted permanently");
+    } catch (error) {
+      toast.error(error.message || "Delete failed");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <Loader />
       </div>
+    );
+  }
 
-      {/* Empty State */}
-      {files.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-[60vh] text-center">
-          <Trash2 size={56} className="text-gray-400 mb-4" />
-          <h2 className="text-lg font-medium text-gray-700">
-            Trash is empty
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Files you delete will appear here
-          </p>
-        </div>
-      ) : (
-        /* Trash Items */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {files.map((file) => (
-            <div
-              key={file._id}
-              className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition"
-            >
-              {/* File Info */}
-              <div className="mb-3">
-                <h3 className="font-medium text-gray-900 truncate">
-                  {file.title}
-                </h3>
-                <p className="text-xs text-gray-500 truncate">
-                  {file.author}
-                </p>
-                {file.deletedAt && (
-                  <p className="text-xs text-red-500 mt-1">
-                    Deleted on{" "}
-                    {new Date(file.deletedAt).toLocaleDateString()}
-                  </p>
-                )}
-              </div>
+  return (
+    <div className="flex h-screen bg-white overflow-hidden">
+      <DriveSidebar
+        currentFolder="trash"
+        onFolderClick={(folder) => {
+          const folderPathMap = {
+            "my-files": "/dashboard",
+            recent: "/recent",
+            starred: "/starred",
+            trash: "/trash",
+          };
+          const targetPath = folderPathMap[folder] || "/dashboard";
+          if (targetPath !== "/trash") {
+            navigate(targetPath);
+          }
+        }}
+        storageUsed={storageStats.usedStorage}
+        storageTotal={storageStats.totalStorage}
+      />
 
-              {/* Actions */}
-              <div className="flex items-center justify-between mt-4">
-                <button
-                  onClick={() => onRestore(file._id)}
-                  className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
-                >
-                  <RotateCcw size={16} />
-                  Restore
-                </button>
-
-                <button
-                  onClick={() => onPermanentDelete(file._id)}
-                  className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
-                >
-                  <Trash2 size={16} />
-                  Delete forever
-                </button>
-              </div>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="border-b bg-white px-6 py-4 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">Trash</h2>
+              <p className="text-sm text-gray-500">{files.length} items</p>
             </div>
-          ))}
+          </div>
         </div>
-      )}
+
+        {files.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center text-gray-500">
+            <Trash2 size={56} className="mb-4 text-gray-400" />
+            <p className="text-base font-medium">Trash is empty</p>
+            <p className="text-sm text-gray-500">Files you delete will appear here</p>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-auto bg-gray-50">
+            <FileGridView
+              files={files}
+              isTrash
+              onRestore={handleRestore}
+              onPermanentDelete={handlePermanentDelete}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
