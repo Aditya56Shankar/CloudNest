@@ -8,6 +8,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import bookRoutes from "./routes/books.js";
 import pdfRoutes from "./routes/pdf.js";
+import versionRoutes from "./routes/versions.js";
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ app.use(cookieParser());
 app.use("/api/books", bookRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/books", pdfRoutes);
+app.use("/api/versions", versionRoutes);
 
 
 app.listen(PORT, () => {

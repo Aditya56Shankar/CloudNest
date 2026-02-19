@@ -14,22 +14,29 @@ const bookSchema = new mongoose.Schema(
 
     fileUrl: { type: String },
     fileName: { type: String },
-    fileSize: { type: Number, default: 0 }, // Size in bytes
+    fileSize: { type: Number, default: 0 }, 
+    cloudinaryPublicId: { type: String }, 
     isPublic: { type: Boolean, default: false },
 
-    // ⭐ Starred field
+    currentVersion: {
+      type: Number,
+      default: 1
+    },
+    hasVersionHistory: {
+      type: Boolean,
+      default: false
+    },
+
     isStarred: {
       type: Boolean,
       default: false
     },
 
-    // 📅 Last accessed field for recent files
     lastAccessedAt: {
       type: Date,
       default: Date.now
     },
 
-    // ♻️ Recycle Bin fields
     isDeleted: {
       type: Boolean,
       default: false

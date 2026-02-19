@@ -1,0 +1,379 @@
+.version-history-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.version-history-modal {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.version-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.version-history-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #6b7280;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.version-history-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.file-info {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.file-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.125rem;
+    color: #111827;
+}
+
+.file-info p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.upload-version-section {
+    margin-bottom: 32px;
+    padding: 20px;
+    background: #f0f9ff;
+    border: 2px dashed #3b82f6;
+    border-radius: 8px;
+}
+
+.upload-version-section h4 {
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.upload-form input[type="file"] {
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+.upload-form input[type="text"] {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+.upload-form input[type="text"]:focus,
+.upload-form input[type="file"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.selected-file-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.file-size {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+.btn-upload {
+    padding: 10px 16px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-upload:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-upload:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.version-list h4 {
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.loading,
+.no-versions {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.versions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.version-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.version-item:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.version-item.current {
+    background: #fef3c7;
+    border-color: #f59e0b;
+}
+
+.version-info {
+    flex: 1;
+}
+
+.version-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.version-number {
+    font-weight: 600;
+    color: #111827;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge-current {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #f59e0b;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.version-date {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.version-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.version-filename {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #374151;
+    font-weight: 500;
+}
+
+.version-size,
+.version-comment,
+.version-uploader {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.version-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 16px;
+}
+
+.version-actions button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-view {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.btn-view:hover {
+    background: #bae6fd;
+    transform: translateY(-1px);
+}
+
+.btn-restore {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.btn-restore:hover {
+    background: #bbf7d0;
+    transform: translateY(-1px);
+}
+
+.btn-delete {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.btn-delete:hover {
+    background: #fecaca;
+    transform: translateY(-1px);
+}
+
+/* Scrollbar styling */
+.version-history-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.version-history-body::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+}
+
+.version-history-body::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+.version-history-body::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .version-history-modal {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .version-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .version-actions {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+
+    .version-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+}

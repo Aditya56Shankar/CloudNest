@@ -196,6 +196,7 @@ router.post(
     let fileUrl = null;
     let fileName = null;
     let fileSize = 0;
+    let cloudinaryPublicId = null;
 
     if (req.file) {
       // Get file size before uploading
@@ -205,6 +206,7 @@ router.post(
       const result = await uploadOnCloudinary(req.file.path);
       fileUrl = result.secure_url;
       fileName = req.file.originalname;
+      cloudinaryPublicId = result.public_id;
     }
 
     const book = await Book.create({
@@ -216,6 +218,7 @@ router.post(
       fileUrl,
       fileName,
       fileSize,
+      cloudinaryPublicId,
     });
 
     res.status(201).json(book);
@@ -247,6 +250,7 @@ router.put(
     let fileUrl = book.fileUrl;
     let fileName = book.fileName;
     let fileSize = book.fileSize;
+    let cloudinaryPublicId = book.cloudinaryPublicId;
 
     if (req.file) {
       // Get file size before uploading
@@ -256,11 +260,12 @@ router.put(
       const result = await uploadOnCloudinary(req.file.path);
       fileUrl = result.secure_url;
       fileName = req.file.originalname;
+      cloudinaryPublicId = result.public_id;
     }
 
     const updated = await Book.findByIdAndUpdate(
       id,
-      { ...req.body, fileUrl, fileName, fileSize },
+      { ...req.body, fileUrl, fileName, fileSize, cloudinaryPublicId },
       { new: true }
     );
 

@@ -4,8 +4,9 @@ import { toast } from "sonner";
 
 import DriveSidebar from "../components/DriveSidebar/DriveSidebar";
 import FileGridView from "../components/FileGridView/FileGridView";
-import UploadArea from "../components/UploadArea/UploadArea";
 import Loader from "../components/ui/Loader";
+import UploadArea from "../components/UploadArea/UploadArea";
+import VersionHistory from "../components/VersionHistory/VersionHistory";
 
 import {
   getMyBooks,
@@ -32,6 +33,7 @@ export default function DriveDashboard() {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [summaryText, setSummaryText] = useState("");
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [versionHistoryFile, setVersionHistoryFile] = useState(null);
 
   /* ================= AUTH GUARD ================= */
 
@@ -248,6 +250,7 @@ export default function DriveDashboard() {
     }
 
     try {
+      setVersionHistoryFile(null);
       setIsSummarizing(true);
       setSummaryText("");
       setShowSummaryModal(true);
@@ -288,6 +291,17 @@ export default function DriveDashboard() {
       setIsSummarizing(false);
     }
   };
+  const handleVersionHistory = (file) => {
+    setShowSummaryModal(false);
+    setSummaryText("");
+    setVersionHistoryFile(file);
+  };
+
+  const handleVersionChange = async () => {
+    // Refresh the files list after version changes
+    await fetchFiles();
+  };
+
 
   /* ================= UI ================= */
 
@@ -346,10 +360,13 @@ export default function DriveDashboard() {
               onRename={handleRename}
               onToggleStar={handleToggleStar}
               onSummarize={handleSummarizePDF}
+              onVersionHistory={handleVersionHistory}
             />
           </div>
         )}
       </div>
+
+      {/* PDF Summary Modal */}
       {showSummaryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg">
@@ -375,6 +392,15 @@ export default function DriveDashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Version History Modal */}
+      {versionHistoryFile && (
+        <VersionHistory
+          file={versionHistoryFile}
+          onClose={() => setVersionHistoryFile(null)}
+          onVersionChange={handleVersionChange}
+        />
       )}
 
     </div>

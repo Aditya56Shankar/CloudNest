@@ -219,3 +219,72 @@ export const restoreTrash = async (id) => {
 
   return response.json();
 };
+
+/* =========================================================
+   VERSION CONTROL
+========================================================= */
+
+/**
+ * 📜 GET VERSION HISTORY
+ * Backend: GET /versions/:bookId/history
+ */
+export const getVersionHistory = async (bookId) => {
+  const res = await fetch(`${API_URL}/versions/${bookId}/history`, {
+    headers: getHeaders(),
+  });
+  return handleResponse(res);
+};
+
+/**
+ * 📤 UPLOAD NEW VERSION
+ * Backend: POST /versions/:bookId/new-version
+ */
+export const uploadNewVersion = async (bookId, file, comment = "") => {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (comment) {
+    formData.append("comment", comment);
+  }
+
+  const res = await fetch(`${API_URL}/versions/${bookId}/new-version`, {
+    method: "POST",
+    headers: getHeaders(true), // multipart
+    body: formData,
+  });
+  return handleResponse(res);
+};
+
+/**
+ * 🔄 RESTORE VERSION
+ * Backend: POST /versions/:bookId/restore/:versionNumber
+ */
+export const restoreVersion = async (bookId, versionNumber) => {
+  const res = await fetch(`${API_URL}/versions/${bookId}/restore/${versionNumber}`, {
+    method: "POST",
+    headers: getHeaders(),
+  });
+  return handleResponse(res);
+};
+
+/**
+ * ❌ DELETE VERSION
+ * Backend: DELETE /versions/:bookId/versions/:versionNumber
+ */
+export const deleteVersion = async (bookId, versionNumber) => {
+  const res = await fetch(`${API_URL}/versions/${bookId}/versions/${versionNumber}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+  return handleResponse(res);
+};
+
+/**
+ * 📄 GET VERSION DETAILS
+ * Backend: GET /versions/:bookId/versions/:versionNumber
+ */
+export const getVersionDetails = async (bookId, versionNumber) => {
+  const res = await fetch(`${API_URL}/versions/${bookId}/versions/${versionNumber}`, {
+    headers: getHeaders(),
+  });
+  return handleResponse(res);
+};

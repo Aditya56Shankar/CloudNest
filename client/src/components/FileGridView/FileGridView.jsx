@@ -5,6 +5,7 @@ import {
   File,
   FileText,
   Heart,
+  History,
   Image,
   Music,
   RotateCcw,
@@ -48,7 +49,8 @@ export default function FileGridView({
   onRename,
   onOpen,
   onToggleStar,
-  onSummarize
+  onSummarize,
+  onVersionHistory
 }) {
   const [selectedFiles, setSelectedFiles] = useState(new Set());
   const [contextMenu, setContextMenu] = useState(null);
@@ -87,6 +89,7 @@ export default function FileGridView({
             onOpen={() => onOpen?.(file)}
             onToggleStar={() => onToggleStar?.(file)}
             onSummarize={() => onSummarize?.(file)}
+            onVersionHistory={() => onVersionHistory?.(file)}
           />
         ))}
       </div>
@@ -101,6 +104,7 @@ export default function FileGridView({
           onPermanentDelete={onPermanentDelete}
           onShare={onShare}
           onToggleStar={onToggleStar}
+          onVersionHistory={onVersionHistory}
           onSummarize={onSummarize}
           onClose={() => setContextMenu(null)}
         />
@@ -127,6 +131,7 @@ function FileGridItem({
   onShare,
   onOpen,
   onToggleStar,
+  onVersionHistory,
   onSummarize
 }) {
   const isPDF = file.fileName?.toLowerCase().endsWith(".pdf");
@@ -137,8 +142,8 @@ function FileGridItem({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       className={`relative p-3 rounded-lg border-2 cursor-pointer transition ${isSelected
-          ? "border-blue-500 bg-blue-50"
-          : "border-transparent hover:border-gray-200 bg-gray-50"
+        ? "border-blue-500 bg-blue-50"
+        : "border-transparent hover:border-gray-200 bg-gray-50"
         }`}
       onClick={onToggleSelect}
     >
@@ -177,14 +182,25 @@ function FileGridItem({
           ) : (
             <>
               {isPDF && (
-                <ActionButton
-                  icon={<FileText size={16} />}
-                  title="Summarize PDF"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSummarize();
-                  }}
-                />
+                <>
+                  <ActionButton
+                    icon={<FileText size={16} />}
+                    title="Summarize PDF"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSummarize();
+                    }}
+                  />
+                  <ActionButton
+                    icon={<History size={16} />}
+                    title="Version History"
+                    className="text-blue-600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onVersionHistory();
+                    }}
+                  />
+                </>
               )}
               <ActionButton icon={<Download size={16} />} onClick={onDownload} />
               <ActionButton icon={<Share2 size={16} />} onClick={onShare} />
@@ -224,6 +240,7 @@ function ContextMenu({
   onShare,
   onToggleStar,
   onSummarize,
+  onVersionHistory,
   onClose
 }) {
   const isPDF = file.fileName?.toLowerCase().endsWith(".pdf");
@@ -259,14 +276,25 @@ function ContextMenu({
         ) : (
           <>
             {isPDF && (
-              <MenuItem
-                icon={<FileText size={16} />}
-                label="Summarize PDF"
-                onClick={() => {
-                  onSummarize(file);
-                  onClose();
-                }}
-              />
+              <>
+                <MenuItem
+                  icon={<FileText size={16} />}
+                  label="Summarize PDF"
+                  onClick={() => {
+                    onSummarize(file);
+                    onClose();
+                  }}
+                />
+                <MenuItem
+                  icon={<History size={16} />}
+                  label="Version History"
+                  className="text-blue-600"
+                  onClick={() => {
+                    onVersionHistory(file);
+                    onClose();
+                  }}
+                />
+              </>
             )}
             <MenuItem
               icon={<Download size={16} />}
