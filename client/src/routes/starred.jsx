@@ -334,8 +334,18 @@ export default function Starred() {
                                 <Loader />
                             </div>
                         ) : (
-                            <div className="max-h-[400px] overflow-y-auto whitespace-pre-wrap text-sm text-gray-700">
-                                {summaryText}
+                            <div className="max-h-[400px] overflow-y-auto whitespace-pre-wrap text-base leading-relaxed text-gray-700">
+                                {(() => {
+                                    const [firstLine = "", ...restLines] = (summaryText || "").split(/\r?\n/);
+                                    const restText = restLines.join("\n").trim();
+
+                                    return (
+                                        <>
+                                            <p className="text-lg font-bold text-gray-900">{firstLine}</p>
+                                            {restText ? <div className="mt-2">{restText}</div> : null}
+                                        </>
+                                    );
+                                })()}
                             </div>
                         )}
 

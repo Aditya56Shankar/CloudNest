@@ -95,4 +95,8 @@ DATABASE_URL=
 # =========================
 # AI / PDF Summarization
 # =========================
-OPENAI_API_KEY=
+OPENROUTER_API_KEY=
+# Optional: override default summary model
+OPENROUTER_MODEL=
+# Optional: comma-separated fallbacks
+OPENROUTER_FALLBACK_MODELS=
