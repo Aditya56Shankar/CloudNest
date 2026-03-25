@@ -136,7 +136,7 @@ const SKILL_DB = [
   "aws", "azure", "gcp",
   "docker", "kubernetes", "jenkins", "terraform",
   "java", "python", "c++", "react", "node", "spring",
-  "sql", "excel", "power bi", "tableau", "pandas"
+  "sql", "postgresql", "excel", "power bi", "tableau", "pandas", "databricks", "looker studio", "looker"
 ];
 
 const extractSkills = (text) => {
@@ -149,25 +149,50 @@ const ROLE_MAP = {
   "Cloud Engineer": ["aws", "azure", "gcp"],
   "DevOps Engineer": ["docker", "kubernetes", "jenkins", "terraform"],
   "Software Developer": ["java", "python", "c++", "react", "node", "spring"],
-  "Data Analyst": ["sql", "excel", "power bi", "tableau", "pandas"]
+  "Data Analyst": ["sql", "postgresql", "excel", "power bi", "tableau", "pandas", "databricks", "looker studio", "looker"]
 };
 
-const classifyRole = (skills) => {
+const ROLE_HINTS = {
+  "Cloud Engineer": ["cloud engineer", "cloud infrastructure", "cloud platform"],
+  "DevOps Engineer": ["devops", "site reliability", "sre", "ci/cd", "infrastructure as code"],
+  "Software Developer": ["software developer", "software engineer", "full stack", "backend", "frontend", "application development"],
+  "Data Analyst": ["data analyst", "analytics", "data storytelling", "dashboard", "business intelligence", "cohort analysis", "reporting", "biweekly meetings"]
+};
+
+const scoreRoleHints = (text, hints = []) => {
+  if (!text) return 0;
+  return hints.reduce((score, hint) => (text.includes(hint) ? score + 1 : score), 0);
+};
+
+const classifyRole = (skills, text = "") => {
+  const normalizedText = (text || "").toLowerCase();
   let bestRole = "Unknown";
   let maxScore = 0;
+  let bestHintScore = 0;
+  let bestSkillScore = 0;
 
   for (const role in ROLE_MAP) {
-    let score = 0;
+    let skillScore = 0;
 
     for (const skill of ROLE_MAP[role]) {
       if (skills.includes(skill)) {
-        score++;
+        skillScore++;
       }
     }
 
-    if (score > maxScore) {
-      maxScore = score;
+    // Explicit role/title hints carry more weight than generic technical overlap.
+    const hintScore = scoreRoleHints(normalizedText, ROLE_HINTS[role]);
+    const totalScore = skillScore + hintScore * 2;
+
+    if (
+      totalScore > maxScore ||
+      (totalScore === maxScore && hintScore > bestHintScore) ||
+      (totalScore === maxScore && hintScore === bestHintScore && skillScore > bestSkillScore)
+    ) {
+      maxScore = totalScore;
       bestRole = role;
+      bestHintScore = hintScore;
+      bestSkillScore = skillScore;
     }
   }
 
@@ -176,7 +201,7 @@ const classifyRole = (skills) => {
 
 const inferRoleFromText = (text) => {
   const extractedSkills = extractSkills(text);
-  const predictedRole = classifyRole(extractedSkills);
+  const predictedRole = classifyRole(extractedSkills, text);
   return { extractedSkills, predictedRole };
 };
 
